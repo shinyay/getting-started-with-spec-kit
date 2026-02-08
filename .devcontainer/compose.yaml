@@ -4,5 +4,5 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ..:/workspaces/${LOCAL_WORKSPACE_FOLDER_BASENAME:-getting-started-with-spec-kit}:cached
+      - ..:/workspaces/${localWorkspaceFolderBasename}:cached
     command: sleep infinity

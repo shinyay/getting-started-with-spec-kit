@@ -1,13 +1,14 @@
 FROM mcr.microsoft.com/devcontainers/python:3.13-trixie
 
-# Install uv (Python package manager) - required for specify CLI
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# Install uv system-wide from official image (avoids curl-to-root PATH issues)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
-# Ensure uv bin path is available
+# Switch to vscode user for user-scoped tool installation
+USER vscode
+
+# Install specify CLI (installs to ~/.local/bin/)
+RUN uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
 ENV PATH="/home/vscode/.local/bin:${PATH}"
 
-# Install specify CLI from spec-kit repository
-RUN uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
-
-# Install GitHub Copilot CLI
-RUN npm install -g @github/copilot@latest
+# Switch back to root so devcontainer features can install properly
+USER root
