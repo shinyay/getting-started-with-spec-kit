@@ -33,6 +33,7 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 |---|---|---|---|---|
 | **A** | [QuickRetro — Team Retrospective Board](scenarios/A-quick-retro.md) | ⭐ Beginner | ~90 min | CRUD, permissions, voting logic |
 | **B** | [Field Inspection PWA — Offline-first](scenarios/B-field-inspection-pwa.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Offline-first, sync conflicts, media uploads |
+| **C** | [OIDC SSO + RBAC — Brownfield Auth](scenarios/C-oidc-sso-rbac.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Brownfield, security/auth, multi-tenancy |
 
 > [!TIP]
 > Open your chosen scenario file alongside this guide. This page explains each SDD phase; the scenario file provides the specific prompts and checkpoints.
@@ -270,7 +271,7 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | Audience | Recommended Scenario |
 |---|---|
 | First-time SDD learners, mixed experience levels | **Scenario A** (QuickRetro) |
-| Experienced developers, want a real-world challenge | **Scenario B** (Field Inspection PWA) |
+| Experienced developers, want a real-world challenge | **Scenario B** (Field Inspection PWA) or **C** (OIDC SSO) |
 | Mixed audience | Let participants self-select; pair beginners together on A |
 | Conference talk (tight time) | **Scenario A** only (fits 90 min) |
 | Half-day workshop (3+ hours) | Multiple scenarios sequentially — A first, then harder ones |
@@ -302,6 +303,19 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | Tasks | 10 min | +3 min | Task list is long; focus on dependency ordering and the golden-path task |
 | Implementation | 15 min | — | Observe service worker and sync engine tasks being created |
 | Wrap-Up | 15 min | — | Rich discussion — offline-first is a great topic for debate |
+
+**Scenario C (OIDC SSO + RBAC) — 120 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Same as other scenarios |
+| Constitution | 10 min | +3 min | Security principles are dense; ensure participants read the fail-closed and tenant isolation rules |
+| Specification | 20 min | +5 min | Auth specs are long; focus on the identity-linking and logout sections |
+| Clarification | 15 min | +5 min | Security edge cases dominate; the secret rotation and impersonation questions are eye-opening |
+| Plan | 20 min | +5 min | Threat model section is unique to this scenario; ensure participants review it |
+| Tasks | 10 min | +3 min | Look for the "attack mindset" and "canary tenant" tasks |
+| Implementation | 15 min | — | Watch for RBAC middleware, migration rollback scripts, and secret handling |
+| Wrap-Up | 15 min | — | Discussion: how does SDD change security-critical development? |
 
 ### Common Issues & Solutions
 
