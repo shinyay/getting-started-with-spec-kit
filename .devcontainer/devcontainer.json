@@ -15,10 +15,6 @@
       "installOhMyZshConfig": true,
       "upgradePackages": true
     },
-    "ghcr.io/devcontainers/features/git:1": {
-      "ppa": true,
-      "version": "latest"
-    },
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts"
     }
