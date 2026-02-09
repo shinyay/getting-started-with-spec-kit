@@ -34,6 +34,7 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 | **A** | [QuickRetro — Team Retrospective Board](scenarios/A-quick-retro.md) | ⭐ Beginner | ~90 min | CRUD, permissions, voting logic |
 | **B** | [Field Inspection PWA — Offline-first](scenarios/B-field-inspection-pwa.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Offline-first, sync conflicts, media uploads |
 | **C** | [OIDC SSO + RBAC — Brownfield Auth](scenarios/C-oidc-sso-rbac.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Brownfield, security/auth, multi-tenancy |
+| **D** | [Stripe Subscriptions + Dunning](scenarios/D-stripe-subscriptions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Money correctness, idempotency, state machines |
 
 > [!TIP]
 > Open your chosen scenario file alongside this guide. This page explains each SDD phase; the scenario file provides the specific prompts and checkpoints.
@@ -316,6 +317,19 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | Tasks | 10 min | +3 min | Look for the "attack mindset" and "canary tenant" tasks |
 | Implementation | 15 min | — | Watch for RBAC middleware, migration rollback scripts, and secret handling |
 | Wrap-Up | 15 min | — | Discussion: how does SDD change security-critical development? |
+
+**Scenario D (Stripe Subscriptions) — 120 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Same as other scenarios |
+| Constitution | 10 min | +3 min | Focus on correctness-over-speed and fail-safe access principles |
+| Specification | 20 min | +5 min | State machine is the core — ensure participants understand all transitions |
+| Clarification | 15 min | +5 min | Proration and dunning timeline questions are critical; financial edge cases are eye-opening |
+| Plan | 20 min | +5 min | Webhook architecture (async queue, deduplication) is the most technical section |
+| Tasks | 10 min | +3 min | Look for "financial correctness" and "reconciliation verification" tasks |
+| Implementation | 15 min | — | Watch for idempotency keys, integer cents, and entitlement middleware |
+| Wrap-Up | 15 min | — | Discussion: how does SDD prevent billing bugs that cost real money? |
 
 ### Common Issues & Solutions
 
