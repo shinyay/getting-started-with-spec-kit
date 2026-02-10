@@ -36,6 +36,7 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 | **C** | [OIDC SSO + RBAC — Brownfield Auth](scenarios/C-oidc-sso-rbac.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Brownfield, security/auth, multi-tenancy |
 | **D** | [Stripe Subscriptions + Dunning](scenarios/D-stripe-subscriptions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Money correctness, idempotency, state machines |
 | **E** | [Collaborative Whiteboard — Real-time](scenarios/E-collaborative-whiteboard.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Concurrency, consistency models, latency budgets |
+| **F** | [Event Ingestion Pipeline — IoT](scenarios/F-event-ingestion-pipeline.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Data quality, schema evolution, backpressure, SLOs |
 
 > [!TIP]
 > Open your chosen scenario file alongside this guide. This page explains each SDD phase; the scenario file provides the specific prompts and checkpoints.
@@ -344,6 +345,19 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | Tasks | 10 min | +3 min | Look for the "vertical slice" task and separation of rendering vs sync tracks |
 | Implementation | 15 min | — | Watch for message schema defined before WebSocket code; Canvas rendering decoupled from networking |
 | Wrap-Up | 15 min | — | Discussion: how would switching to CRDTs change the spec and plan? |
+
+**Scenario F (Event Ingestion Pipeline) — 120 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Same as other scenarios |
+| Constitution | 10 min | +3 min | "No silent data loss" and cost awareness are the defining principles |
+| Specification | 20 min | +5 min | Throughput numbers and SLOs are concrete — verify participants understand the dual-layer storage |
+| Clarification | 15 min | +5 min | Late-arriving events, batch semantics, and cost constraints produce the most insight |
+| Plan | 20 min | +5 min | Kafka topic design and backpressure at each boundary are the critical architecture sections |
+| Tasks | 10 min | +3 min | Happy-path-first ordering is key; look for load test tasks with specific throughput targets |
+| Implementation | 15 min | — | Watch for schema validation at ingestion, Parquet batching, and 429 backpressure responses |
+| Wrap-Up | 15 min | — | Discussion: how does SDD prevent silent data loss in distributed pipelines? |
 
 ### Common Issues & Solutions
 
