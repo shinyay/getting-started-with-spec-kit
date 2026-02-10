@@ -39,6 +39,7 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 | **F** | [Event Ingestion Pipeline — IoT](scenarios/F-event-ingestion-pipeline.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Data quality, schema evolution, backpressure, SLOs |
 | **G** | [Terraform + GitHub Actions — IaC](scenarios/G-terraform-github-actions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Infrastructure governance, drift, secrets, cost control |
 | **H** | [Log Analysis CLI — Cross-platform](scenarios/H-cross-platform-cli.md) | ⭐⭐ Intermediate | ~100 min | CLI UX, deterministic output, streaming, packaging |
+| **I** | [API Versioning Migration — v1→v2](scenarios/I-api-versioning-migration.md) | ⭐⭐⭐ Intermediate–Advanced | ~110 min | Backward compatibility, deprecation governance, API contracts |
 
 > [!TIP]
 > Open your chosen scenario file alongside this guide. This page explains each SDD phase; the scenario file provides the specific prompts and checkpoints.
@@ -386,6 +387,19 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | Tasks | 5 min | +3 min | Vertical slice ordering (parse→summarize→text) and golden test creation alongside each command |
 | Implementation | 15 min | — | Watch for stderr/stdout separation, bounded memory, and deterministic output |
 | Wrap-Up | 15 min | — | Discussion: how do golden tests and output contracts prevent CLI regressions? |
+
+**Scenario I (API Versioning Migration) — 110 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Same as other scenarios |
+| Constitution | 10 min | +3 min | Compatibility window governance and response stability are the defining principles |
+| Specification | 20 min | +5 min | v2 standards and the shim concept need careful reading; the deprecation timeline is the key governance artifact |
+| Clarification | 15 min | +5 min | Shim implementation, bug compatibility, and sunset governance produce the richest discussions |
+| Plan | 15 min | +5 min | Contract-first development and the shim-as-pure-translator architecture are critical |
+| Tasks | 5 min | +3 min | Contract tasks first, then v2 implementation, then shim — verify v1 snapshots are recorded before any changes |
+| Implementation | 15 min | — | Watch for v1 snapshots recorded first, contract tests in CI, and 410 Gone post-sunset |
+| Wrap-Up | 15 min | — | Discussion: how does SDD govern a deprecation timeline across 200+ external consumers? |
 
 ### Common Issues & Solutions
 
