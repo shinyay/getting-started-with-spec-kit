@@ -38,6 +38,7 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 | **E** | [Collaborative Whiteboard — Real-time](scenarios/E-collaborative-whiteboard.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Concurrency, consistency models, latency budgets |
 | **F** | [Event Ingestion Pipeline — IoT](scenarios/F-event-ingestion-pipeline.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Data quality, schema evolution, backpressure, SLOs |
 | **G** | [Terraform + GitHub Actions — IaC](scenarios/G-terraform-github-actions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Infrastructure governance, drift, secrets, cost control |
+| **H** | [Log Analysis CLI — Cross-platform](scenarios/H-cross-platform-cli.md) | ⭐⭐ Intermediate | ~100 min | CLI UX, deterministic output, streaming, packaging |
 
 > [!TIP]
 > Open your chosen scenario file alongside this guide. This page explains each SDD phase; the scenario file provides the specific prompts and checkpoints.
@@ -372,6 +373,19 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | Tasks | 10 min | +3 min | Bootstrap-first ordering and CI-pipeline-early are key; security review is a separate task |
 | Implementation | 15 min | — | Watch for no hardcoded values in modules, OIDC instead of static keys, and tagged resources |
 | Wrap-Up | 15 min | — | Discussion: how does SDD prevent infrastructure drift and ad-hoc console changes? |
+
+**Scenario H (Cross-platform CLI) — 100 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Same as other scenarios |
+| Constitution | 10 min | +3 min | Stderr/stdout separation and exit code semantics are the key principles for CLI |
+| Specification | 15 min | +5 min | Three commands with options; ensure participants understand the output contract concept |
+| Clarification | 10 min | +5 min | Language choice (Rust), JSON schema, and signal handling produce the best discussions |
+| Plan | 15 min | +5 min | Streaming architecture and cross-platform packaging are the critical sections |
+| Tasks | 5 min | +3 min | Vertical slice ordering (parse→summarize→text) and golden test creation alongside each command |
+| Implementation | 15 min | — | Watch for stderr/stdout separation, bounded memory, and deterministic output |
+| Wrap-Up | 15 min | — | Discussion: how do golden tests and output contracts prevent CLI regressions? |
 
 ### Common Issues & Solutions
 
