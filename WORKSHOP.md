@@ -37,6 +37,7 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 | **D** | [Stripe Subscriptions + Dunning](scenarios/D-stripe-subscriptions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Money correctness, idempotency, state machines |
 | **E** | [Collaborative Whiteboard — Real-time](scenarios/E-collaborative-whiteboard.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Concurrency, consistency models, latency budgets |
 | **F** | [Event Ingestion Pipeline — IoT](scenarios/F-event-ingestion-pipeline.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Data quality, schema evolution, backpressure, SLOs |
+| **G** | [Terraform + GitHub Actions — IaC](scenarios/G-terraform-github-actions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Infrastructure governance, drift, secrets, cost control |
 
 > [!TIP]
 > Open your chosen scenario file alongside this guide. This page explains each SDD phase; the scenario file provides the specific prompts and checkpoints.
@@ -358,6 +359,19 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | Tasks | 10 min | +3 min | Happy-path-first ordering is key; look for load test tasks with specific throughput targets |
 | Implementation | 15 min | — | Watch for schema validation at ingestion, Parquet batching, and 429 backpressure responses |
 | Wrap-Up | 15 min | — | Discussion: how does SDD prevent silent data loss in distributed pipelines? |
+
+**Scenario G (Terraform + GitHub Actions) — 120 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Same as other scenarios |
+| Constitution | 10 min | +3 min | Drift detection, blast radius control, and no-manual-changes are the defining principles |
+| Specification | 20 min | +5 min | Environment sizing table and CI pipeline stages need careful reading |
+| Clarification | 15 min | +5 min | Bootstrap chicken-and-egg, OIDC trust policy, and database credential management are the key discussions |
+| Plan | 20 min | +5 min | Module structure and CI artifact passing (plan→apply consistency) are the critical sections |
+| Tasks | 10 min | +3 min | Bootstrap-first ordering and CI-pipeline-early are key; security review is a separate task |
+| Implementation | 15 min | — | Watch for no hardcoded values in modules, OIDC instead of static keys, and tagged resources |
+| Wrap-Up | 15 min | — | Discussion: how does SDD prevent infrastructure drift and ad-hoc console changes? |
 
 ### Common Issues & Solutions
 
