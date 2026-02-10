@@ -35,6 +35,7 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 | **B** | [Field Inspection PWA — Offline-first](scenarios/B-field-inspection-pwa.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Offline-first, sync conflicts, media uploads |
 | **C** | [OIDC SSO + RBAC — Brownfield Auth](scenarios/C-oidc-sso-rbac.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Brownfield, security/auth, multi-tenancy |
 | **D** | [Stripe Subscriptions + Dunning](scenarios/D-stripe-subscriptions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Money correctness, idempotency, state machines |
+| **E** | [Collaborative Whiteboard — Real-time](scenarios/E-collaborative-whiteboard.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Concurrency, consistency models, latency budgets |
 
 > [!TIP]
 > Open your chosen scenario file alongside this guide. This page explains each SDD phase; the scenario file provides the specific prompts and checkpoints.
@@ -330,6 +331,19 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | Tasks | 10 min | +3 min | Look for "financial correctness" and "reconciliation verification" tasks |
 | Implementation | 15 min | — | Watch for idempotency keys, integer cents, and entitlement middleware |
 | Wrap-Up | 15 min | — | Discussion: how does SDD prevent billing bugs that cost real money? |
+
+**Scenario E (Collaborative Whiteboard) — 120 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Same as other scenarios |
+| Constitution | 10 min | +3 min | Latency budgets and convergence guarantees are the key principles to verify |
+| Specification | 20 min | +5 min | Object types and conflict rules per type are dense; ensure participants understand the differences |
+| Clarification | 15 min | +5 min | Text-editing locking vs merging is the pivotal decision; undo stack persistence sparks good debate |
+| Plan | 20 min | +5 min | Consistency model choice (authoritative server vs CRDT) is the most important architectural discussion |
+| Tasks | 10 min | +3 min | Look for the "vertical slice" task and separation of rendering vs sync tracks |
+| Implementation | 15 min | — | Watch for message schema defined before WebSocket code; Canvas rendering decoupled from networking |
+| Wrap-Up | 15 min | — | Discussion: how would switching to CRDTs change the spec and plan? |
 
 ### Common Issues & Solutions
 
