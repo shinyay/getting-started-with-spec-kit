@@ -32,17 +32,26 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 | | Scenario | Level | Duration | Key SDD Themes |
 |---|---|---|---|---|
 | **A** | [QuickRetro — Team Retrospective Board](scenarios/A-quick-retro.md) | ⭐ Beginner | ~90 min | CRUD, permissions, voting logic |
+| **J** | [Pomodoro Timer + Task Board](scenarios/J-pomodoro-timer.md) | ⭐ Beginner | ~90 min | State machine specification, time-based logic, persistence |
+| **K** | [MarkdownPad — Note-Taking App](scenarios/K-markdown-notes.md) | ⭐ Beginner | ~90 min | Rendering correctness, feature whitelist, XSS prevention |
+| **L** | [RecipeBox — Collection & Meal Planner](scenarios/L-recipe-collection.md) | ⭐ Beginner | ~90 min | Nested data modeling, fraction arithmetic, calculation correctness |
+| **H** | [Log Analysis CLI — Cross-platform](scenarios/H-cross-platform-cli.md) | ⭐⭐ Intermediate | ~100 min | CLI UX, deterministic output, streaming, packaging |
 | **B** | [Field Inspection PWA — Offline-first](scenarios/B-field-inspection-pwa.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Offline-first, sync conflicts, media uploads |
 | **C** | [OIDC SSO + RBAC — Brownfield Auth](scenarios/C-oidc-sso-rbac.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Brownfield, security/auth, multi-tenancy |
 | **D** | [Stripe Subscriptions + Dunning](scenarios/D-stripe-subscriptions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Money correctness, idempotency, state machines |
+| **G** | [Terraform + GitHub Actions — IaC](scenarios/G-terraform-github-actions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Infrastructure governance, drift, secrets, cost control |
+| **I** | [API Versioning Migration — v1→v2](scenarios/I-api-versioning-migration.md) | ⭐⭐⭐ Intermediate–Advanced | ~110 min | Backward compatibility, deprecation governance, API contracts |
 | **E** | [Collaborative Whiteboard — Real-time](scenarios/E-collaborative-whiteboard.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Concurrency, consistency models, latency budgets |
 | **F** | [Event Ingestion Pipeline — IoT](scenarios/F-event-ingestion-pipeline.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Data quality, schema evolution, backpressure, SLOs |
-| **G** | [Terraform + GitHub Actions — IaC](scenarios/G-terraform-github-actions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Infrastructure governance, drift, secrets, cost control |
-| **H** | [Log Analysis CLI — Cross-platform](scenarios/H-cross-platform-cli.md) | ⭐⭐ Intermediate | ~100 min | CLI UX, deterministic output, streaming, packaging |
-| **I** | [API Versioning Migration — v1→v2](scenarios/I-api-versioning-migration.md) | ⭐⭐⭐ Intermediate–Advanced | ~110 min | Backward compatibility, deprecation governance, API contracts |
 
 > [!TIP]
 > Open your chosen scenario file alongside this guide. This page explains each SDD phase; the scenario file provides the specific prompts and checkpoints.
+
+> [!NOTE]
+> **Beginner scenarios (J, K, L)** have a dedicated design:
+> - **MVP / Core / Stretch** scope tiers let facilitators control depth
+> - **Decision questions** are explicitly formatted for `/speckit.clarify`
+> - **Facilitator answer keys** are in [`scenarios/_answers/`](scenarios/_answers/) — keep these separate from participants until after the clarify phase
 
 ---
 
@@ -189,6 +198,21 @@ Compare this structured task breakdown to how you would normally start coding. W
 
 ---
 
+## Part 6b: Analyze (Optional) [5 min]
+
+Before implementing, optionally run the cross-artifact consistency check:
+
+```
+/speckit.analyze
+```
+
+This validates that your spec, plan, and tasks are aligned — every spec requirement has a corresponding task, and every task traces back to a requirement. It is especially valuable for beginners learning to trust the SDD process.
+
+> [!TIP]
+> For time-constrained workshops, skip this step. For longer workshops or advanced audiences, make it a required checkpoint before implementation.
+
+---
+
 ## Part 7: Implement [10–15 min]
 
 Start the implementation. In a workshop setting, we will observe the process rather than wait for full completion.
@@ -276,11 +300,38 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 
 | Audience | Recommended Scenario |
 |---|---|
-| First-time SDD learners, mixed experience levels | **Scenario A** (QuickRetro) |
-| Experienced developers, want a real-world challenge | **Scenario B** (Field Inspection PWA) or **C** (OIDC SSO) |
-| Mixed audience | Let participants self-select; pair beginners together on A |
-| Conference talk (tight time) | **Scenario A** only (fits 90 min) |
-| Half-day workshop (3+ hours) | Multiple scenarios sequentially — A first, then harder ones |
+| First-time SDD learners | **Scenario A** (QuickRetro) — simplest CRUD baseline |
+| Beginners wanting more depth | **J** (Pomodoro), **K** (Markdown Notes), or **L** (Recipe Collection) — each teaches a different SDD concept at beginner level |
+| Experienced developers, real-world challenge | **Scenario B** (Field Inspection PWA), **C** (OIDC SSO), or **D** (Stripe Billing) |
+| Mixed audience | Let participants self-select from their level tier; pair beginners together |
+| Conference talk (tight time, 60 min) | **Scenario A** or **J** (MVP tier only) |
+| Conference workshop (90 min) | Any beginner scenario (A, J, K, or L) |
+| Half-day workshop (3+ hours) | Start with A, then J/K/L, then one intermediate scenario |
+| Full-day training | Beginner progression (A → J → K → L), then self-select from intermediate/advanced |
+
+**Recommended beginner progression** (each adds one new SDD concept):
+
+| Order | Scenario | New SDD Skill |
+|---|---|---|
+| 1st | A (QuickRetro) | Data modeling + CRUD specs |
+| 2nd | J (Pomodoro) | State machine specification |
+| 3rd | K (Markdown Notes) | Output correctness + security |
+| 4th | L (Recipe Collection) | Calculation correctness + algorithms |
+| Graduate → | H (CLI, ⭐⭐) | Bridges to intermediate |
+
+### Success Indicators by Phase
+
+Use these to evaluate whether participants are truly doing SDD, not just generating documents:
+
+| Phase | Success Indicator |
+|---|---|
+| After Constitution | "We can point to a principle and explain why it changes a design decision." |
+| After Specify | "All deliberate ambiguities are resolved or marked as explicit non-goals." |
+| After Clarify | "We answered each open question and the spec is unambiguous." |
+| After Plan | "We can identify the risky parts and the chosen technical approach." |
+| After Tasks | "Tasks are each 15–45 min of work with a clear 'done when' condition." |
+| After Analyze | "Every spec requirement has a task; every task traces to the spec." |
+| After Implement | "Generated code traces back to spec requirements; no surprise features." |
 
 ### Timing Tips
 
@@ -296,6 +347,45 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | Tasks | 5 min | — | Fast step; focus on reading the output |
 | Implementation | 10 min | — | Observation phase; don't wait for full completion |
 | Wrap-Up | 10 min | — | Reserve this time; the discussion is essential |
+
+**Scenario J (Pomodoro Timer) — 90 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Same as Scenario A |
+| Constitution | 10 min | +3 min | Short constitution (5 principles); note how it's proportional to risk |
+| Specification | 15 min | +5 min | State machine is the focus; watch whether the spec produces explicit transitions |
+| Clarification | 10 min | +5 min | Check all 10 decision questions; pause/resume + tab-close are the "aha" moments |
+| Plan | 15 min | +5 min | Watch for `setInterval` vs wall-clock; ensure state machine is explicit transitions |
+| Tasks | 5 min | — | State machine tasks should come before UI tasks |
+| Implementation | 10 min | — | Watch for `Date.now()` usage, not `setInterval` ticks |
+| Wrap-Up | 10 min | — | Discussion: how does a state machine spec prevent behavioral bugs? |
+
+**Scenario K (Markdown Notes) — 90 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Same as Scenario A |
+| Constitution | 10 min | +3 min | Whitelist principle is key — "not listed = not rendered" |
+| Specification | 15 min | +5 min | Supported + NOT-supported lists are the core; ensure participants read both |
+| Clarification | 10 min | +5 min | XSS question (`javascript:` links) is the eye-opener; URL scheme rules are critical |
+| Plan | 15 min | +5 min | Rendering pipeline (source → parse → sanitize → display) is THE plan artifact |
+| Tasks | 5 min | — | Security tasks should NOT be deferred to end |
+| Implementation | 10 min | — | Watch for parser disabling unsupported features, DOMPurify allowlist |
+| Wrap-Up | 10 min | — | Discussion: how does a whitelist spec prevent scope creep and security bugs? |
+
+**Scenario L (Recipe Collection) — 90 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Same as Scenario A |
+| Constitution | 10 min | +3 min | "Sensible kitchen defaults" sounds easy; ask: what IS practical precision for ⅜ cup? |
+| Specification | 15 min | +5 min | Fraction system is dense; ensure participants understand allowed denominators and rounding |
+| Clarification | 10 min | +5 min | "1.5 eggs" question always gets a laugh; fraction denominators + piece rounding are key |
+| Plan | 15 min | +5 min | Fraction utility must be pure functions (no DOM); scaling must be a pure function |
+| Tasks | 5 min | — | Fraction utility should be the FIRST task — it's the algorithmic foundation |
+| Implementation | 10 min | — | Watch for `{ numerator, denominator }`, not `parseFloat`; vulgar fraction display |
+| Wrap-Up | 10 min | — | Discussion: how does SDD prevent calculation bugs? Connect to billing precision in D. |
 
 **Scenario B (Field Inspection PWA) — 120 minutes:**
 
@@ -411,7 +501,8 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | AI generates overly complex plan | Prompt: "Simplify this plan. Remove any frameworks or libraries not explicitly requested." |
 | Participants at different speeds | Fast finishers → Extension activities in scenario file. Slow finishers → Skip to `/speckit.tasks` with facilitator-provided plan |
 | AI output differs between participants | This is expected and a teaching moment. Compare outputs to discuss how AI interprets ambiguity. |
-| Scenario seems too complex for audience | Fall back to Scenario A; use the harder scenario as a demo-only walkthrough |
+| Scenario seems too complex for audience | Fall back to a beginner scenario (A, J, K, or L); use the harder scenario as a demo-only walkthrough |
+| Beginner scenario too simple for some | Use MVP tier for beginners and Core/Stretch for fast finishers in the same scenario |
 
 ### Key Teaching Moments
 
