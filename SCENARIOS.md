@@ -73,16 +73,24 @@ External services, auth, multi-tenancy, financial correctness. These mirror prod
 
 ## ⭐⭐⭐⭐ Advanced — Distributed Systems
 
-Concurrency, real-time collaboration, high-throughput pipelines. These push SDD to its limits.
+Concurrency, real-time collaboration, high-throughput pipelines, distributed workflows, platform extensibility. These push SDD to its limits — the spec must define failure models, safety invariants, and quantitative SLOs.
+
+All ⭐⭐⭐⭐ scenarios require specifying a [failure model, safety invariants, and observability requirements](WORKSHOP.md#advanced-baseline-contract).
 
 | | Scenario | What You Build | What You Learn | Duration |
 |---|---|---|---|---|
-| **E** | [Collaborative Whiteboard](scenarios/E-collaborative-whiteboard.md) | Real-time drawing canvas | Concurrency models, consistency guarantees, CRDTs | ~120 min |
+| **E** | [Collaborative Whiteboard](scenarios/E-collaborative-whiteboard.md) | Real-time drawing canvas | Consistency models, client prediction, conflict resolution | ~120 min |
 | **F** | [Event Ingestion Pipeline](scenarios/F-event-ingestion-pipeline.md) | IoT data pipeline | Schema evolution, backpressure, SLOs, data quality | ~120 min |
+| **P** | [OrderFlow Saga](scenarios/P-order-fulfillment-saga.md) | Multi-step order fulfillment | Compensating transactions, timeout semantics, exactly-once | ~120 min |
+| **Q** | [PlugKit Runtime](scenarios/Q-plugin-runtime.md) | Plugin platform + sandbox | Public API contracts, sandboxed execution, capability permissions | ~120 min |
+| **R** | [FlagShip Experimentation](scenarios/R-feature-flag-experimentation.md) | Feature flags + A/B testing | Deterministic bucketing, statistical correctness, kill switches | ~120 min |
 
 **Which one?**
-- 🟡 **E (Whiteboard)** — What happens when two users edit the same shape? Teaches consistency specification.
-- 🟡 **F (Pipeline)** — What happens when 50K events/sec hit your ingestion? Teaches throughput and quality specification.
+- 🟢 **P (OrderFlow)** — Best first advanced. "Payment timed out — did it charge?" teaches that distributed failure is the default state.
+- 🟡 **E (Whiteboard)** — Best for "how do I spec real-time?" Consistency model is the fundamental architectural choice.
+- 🟡 **F (Pipeline)** — Best for "how do I spec throughput?" Forces concrete SLOs, not vague "high performance."
+- 🟡 **Q (PlugKit)** — Best for "how do I spec a platform?" Your spec IS the product — external developers build against it.
+- 🟡 **R (FlagShip)** — Best for "how do I spec correctness that's both statistical AND distributed?" Bucketing + SRM detection.
 
 ---
 
@@ -96,6 +104,9 @@ Concurrency, real-time collaboration, high-throughput pipelines. These push SDD 
 
 ### 🎓 "I have a full day"
 → **A** → **J** or **K** → **M** → **N** → choose one ⭐⭐⭐
+
+### 🧠 "I want the advanced track"
+→ **M** (API contracts) → **D** (Stripe billing) → **P** (saga) → **R** (experimentation)
 
 ### 🏢 "Team training — mixed levels"
 → Everyone does **A** together, then self-selects by level

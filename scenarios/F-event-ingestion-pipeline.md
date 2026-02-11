@@ -125,14 +125,47 @@ Non-goals (explicitly out of scope):
 - Device management (provisioning, firmware updates, fleet grouping) — separate system.
 - User-facing alerting UI — alerts are emitted to a notification channel (Slack/PagerDuty webhook); the UI is out of scope.
 - Machine learning anomaly detection — use static thresholds and z-score only for v1.
+
+Failure model (must be specified):
+- Requests may time out and be retried by devices (at-least-once delivery).
+- Messages may be delivered out of order across partitions.
+- Processing consumers may crash after reading from queue but before writing to store.
+- Downstream stores (S3, TimescaleDB) may become temporarily unavailable.
+- Schema registry may be unreachable (cache fallback required).
+- Device clocks may drift (events with future/past timestamps).
+
+Safety invariants:
+- No silent data loss — every event is either processed or dead-lettered with diagnostic context.
+- Deduplication by event_id — duplicate processing never creates duplicate aggregations.
+- Schema validation at ingestion — invalid events never reach the processing pipeline.
+- Dead-letter store captures ALL failures with enough context to investigate and replay.
+
+Liveness goals:
+- If all components are healthy, events flow from ingestion to dashboard within 30 seconds.
+- If a downstream store recovers, buffered events are eventually processed.
+- Aggregation catches up after outage without manual intervention.
+
+Scope tiers:
+- MVP (required): HTTP ingestion endpoint + schema validation + Kafka producer + single consumer + raw S3 writer. Validates happy-path pipeline end-to-end.
+- Core (recommended): + Deduplication + dead-letter routing + backpressure (429) + aggregation engine (1-min rollups) + dashboard query API + API key auth.
+- Stretch (optional): + Anomaly detection + alerting + replay mechanism + autoscaling + cost validation + load testing (5K/15K events/sec) + failure injection.
 ```
 
-**Deliberate ambiguities to watch for:**
-- What is the batch acknowledgment semantics when a batch is partially valid? (202 with per-event status? or 207 Multi-Status?)
-- How are device groups defined and managed? (out of scope or needed for dashboard queries?)
-- What happens to aggregations when a schema version adds a new metric? (backfill or only forward?)
-- What is the cost budget or cloud spend constraint?
-- How are API keys provisioned and distributed to device fleets?
+**Deliberate ambiguities — decisions that `/speckit.clarify` should surface:**
+
+1. Decision needed: What is the batch acknowledgment semantics when a batch is partially valid — 202 with per-event status, or 207 Multi-Status?
+2. Decision needed: How are device groups defined and managed — in this pipeline or in an external system?
+3. Decision needed: What happens to aggregations when a schema version adds a new metric — backfill from raw, or forward-only?
+4. Decision needed: What is the cost budget or cloud spend constraint?
+5. Decision needed: How are API keys provisioned and distributed to device fleets?
+6. Decision needed: What ordering guarantees do we provide — per-device, global, or none?
+7. Decision needed: How are late-arriving events (>1 hour old) handled — included in aggregations or stored raw only?
+8. Decision needed: When the message queue is full, which events are dead-lettered — oldest (FIFO shed) or newest (backpressure)?
+9. Decision needed: Should the schema registry be an external service (Confluent) or a lightweight custom implementation?
+10. Decision needed: What is the data retention lifecycle — can admins override the 90-day raw retention for compliance?
+
+> [!NOTE]
+> Reference answers for facilitators are in [`_answers/F-event-ingestion-pipeline-answers.md`](_answers/F-event-ingestion-pipeline-answers.md).
 
 **Checkpoint** — verify the generated spec contains:
 - [ ] User stories / system stories with acceptance criteria
@@ -141,6 +174,8 @@ Non-goals (explicitly out of scope):
 - [ ] Dual-layer storage with retention policies
 - [ ] Schema versioning with compatibility rules
 - [ ] Backpressure behavior defined at each layer
+- [ ] Failure model and safety invariants
+- [ ] MVP / Core / Stretch scope tiers
 
 ---
 
@@ -150,17 +185,7 @@ Non-goals (explicitly out of scope):
 /speckit.clarify Review the event ingestion pipeline spec and ask me about every ambiguity, unstated assumption, and gap — especially around: batch response semantics, device group management, new-metric aggregation backfill, cost constraints, API key provisioning, event ordering guarantees, and any distributed systems edge cases you can identify.
 ```
 
-Suggested answers for the workshop:
-
-| Question Theme | Suggested Answer |
-|---|---|
-| Batch response semantics | Return 207 Multi-Status with a per-event array: each entry has the event_id and either "accepted" or "rejected" with a validation error. The batch itself is not atomic — valid events are processed even if others fail. |
-| Device groups | Device groups are managed in the external device management system and exposed via an API. The pipeline queries group membership on dashboard requests. Not part of pipeline scope to create/manage groups. |
-| New metric aggregation | New metrics are aggregated forward-only from the moment the schema is registered. No automatic backfill. An admin can trigger a replay of historical raw events to backfill aggregations if needed. |
-| Cost constraints | Target <$5,000/month cloud spend at sustained baseline throughput. Storage lifecycle policies are the primary cost lever. Compute autoscaling has a hard cap of 20 instances per worker type. |
-| API key provisioning | API keys are created by admins via an admin API, scoped to a device fleet. Keys support rotation: both old and new keys are valid during a configurable overlap window (default 7 days). |
-| Event ordering | No global ordering guarantee. Events are processed in approximate order within a partition (partitioned by device_id). Aggregation uses event timestamps, not processing order. Out-of-order events within a time window (5 min) are handled correctly; events arriving more than 1 hour late are accepted into raw storage but excluded from real-time aggregation (backfill via replay if needed). |
-| Late-arriving events | Events with timestamps >1 hour old are stored in raw storage with a "late_arrival" flag. They are not included in real-time aggregations but can be included via replay. Dashboard does not show them unless explicitly queried. |
+Review the questions surfaced. Use the 10 decision questions above as a checklist — did the AI catch all of them?
 
 **Manual refinement:**
 
@@ -271,6 +296,17 @@ Task preferences:
 - Cost validation task verifies S3 lifecycle policies actually delete data
 - Failure injection tasks exist (kill consumers, make stores unavailable)
 - Parallelizable tasks are marked
+
+---
+
+### Analyze (Optional)
+
+```
+/speckit.analyze
+```
+
+> [!TIP]
+> Focus on the failure model — for every failure mode, trace where events end up. Is there a dead-letter path for each? Are there test cases for every backpressure trigger?
 
 ---
 

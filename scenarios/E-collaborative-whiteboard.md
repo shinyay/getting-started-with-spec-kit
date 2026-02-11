@@ -132,14 +132,45 @@ Non-goals (explicitly out of scope):
 - Image/file embedding on the whiteboard (future iteration).
 - Handwriting recognition or shape auto-correction.
 - Mobile/touch-optimized UI (desktop-first for v1).
+
+Failure model (must be specified):
+- WebSocket messages may arrive duplicated or out of order.
+- Client may disconnect mid-stroke (partial drawing).
+- Server may restart; clients must reconnect and rehydrate.
+- Two operations on the same object may arrive simultaneously.
+- A client's clock may drift from the server.
+
+Safety invariants:
+- No duplicate object IDs (ULID + server validation).
+- Delete wins over concurrent move/resize on the same object.
+- Server is the authority — client predictions can be rolled back.
+- No orphan operations — every operation references a valid board and object.
+
+Liveness goals:
+- All connected clients eventually converge to the same board state.
+- Buffered offline operations are eventually applied on reconnect.
+
+Scope tiers:
+- MVP (required): Single drawing tool (pen) + shape tool + WebSocket sync between 2 users + presence (cursors). Authoritative server, no conflict resolution needed beyond "last-writer-wins." Validates the full pipeline: draw → sync → render.
+- Core (recommended): + All object types + object-level locking for text + undo/redo + reconnection with delta sync + permissions (Owner/Collaborator/Viewer) + export PNG.
+- Stretch (optional): + Version history + snapshot restore + progressive loading for large boards + rate limiting + performance testing (50 users, 10K objects) + PDF export.
 ```
 
-**Deliberate ambiguities to watch for:**
-- How should the text cursor behave when two users edit the same sticky note? (blinking cursor position conflicts)
-- What happens to a user's undo stack when they disconnect and reconnect?
-- Can a Board Owner undo another user's actions?
-- How is z-order conflict resolved when two users reorder the same object simultaneously?
-- What is the invite email flow? (accept link, create account if needed?)
+**Deliberate ambiguities — decisions that `/speckit.clarify` should surface:**
+
+1. Decision needed: Should concurrent text editing use character-level merging or object-level locking?
+2. Decision needed: What happens to a user's undo stack when they disconnect and reconnect?
+3. Decision needed: Can a Board Owner undo another user's actions?
+4. Decision needed: How is z-order conflict resolved when two users reorder the same object simultaneously?
+5. Decision needed: What is the invite flow — must the recipient already have an account?
+6. Decision needed: What is the maximum WebSocket message size? How are large strokes (>1000 points) handled?
+7. Decision needed: What happens when the Board Owner deletes a board while collaborators are connected?
+8. Decision needed: Should the consistency model be authoritative server, CRDT, or OT?
+9. Decision needed: When a user with a slow connection joins a large board, does the client load everything at once or progressively?
+10. Decision needed: Should presence updates (cursors) share the same channel as operations, or use a separate lossy channel?
+
+> [!NOTE]
+> Reference answers for facilitators are in [`_answers/E-collaborative-whiteboard-answers.md`](_answers/E-collaborative-whiteboard-answers.md).
 
 **Checkpoint** — verify the generated spec contains:
 - [ ] User stories with acceptance criteria
@@ -147,6 +178,8 @@ Non-goals (explicitly out of scope):
 - [ ] Object type definitions with properties
 - [ ] Conflict handling rules per object type
 - [ ] Undo/redo behavior rules
+- [ ] Failure model and safety invariants
+- [ ] MVP / Core / Stretch scope tiers
 - [ ] A review and acceptance checklist
 
 ---
@@ -157,17 +190,7 @@ Non-goals (explicitly out of scope):
 /speckit.clarify Review the collaborative whiteboard spec and ask me about every ambiguity, unstated assumption, and gap — especially around: concurrent text editing behavior (locking vs merging), undo stack persistence across reconnects, Board Owner undo powers, z-order conflict resolution, invite flow details, and any concurrency edge cases you can identify.
 ```
 
-Suggested answers for the workshop:
-
-| Question Theme | Suggested Answer |
-|---|---|
-| Concurrent text editing (v1) | Use object-level locking for v1. When a user double-clicks a sticky note or text to edit, they acquire a lock. Other users see a lock icon and the editor's name. Lock auto-releases after 30 seconds of inactivity or when the user clicks away. If the lock holder disconnects, the lock releases after 10 seconds. |
-| Undo stack on reconnect | Undo stack is kept in client memory only. On reconnect, the stack is cleared (fresh start). This avoids complex reconciliation of undone operations. |
-| Board Owner undo powers | Board Owner cannot undo other users' actions. They can only delete objects or restore to a previous snapshot. |
-| Z-order conflicts | Last-writer-wins for z-order changes. If two users reorder the same object simultaneously, the last received z-order value is used. Z-order changes propagate like any other property change. |
-| Invite flow | Email invite contains a link with a token. If the recipient has an account, they are added as a collaborator. If not, they must sign up first (the token is preserved). Invite tokens expire after 7 days. |
-| Max message size | Individual WebSocket messages are capped at 64KB. Strokes with >1000 points are split across multiple messages. Server rejects messages exceeding the limit. |
-| Board deletion | Board Owner can delete a board. All collaborators are disconnected and notified. Board data is soft-deleted (recoverable by support for 30 days). |
+Review the questions surfaced. Use the 10 decision questions above as a checklist — did the AI catch all of them?
 
 **Manual refinement:**
 
@@ -272,6 +295,17 @@ Task preferences:
 - Undo/redo is its own task with explicit test criteria
 - Performance/soak tests exist with concrete parameters (50 users, 10K objects, 30 min)
 - Reconnection simulation tests cover multiple scenarios
+
+---
+
+### Analyze (Optional)
+
+```
+/speckit.analyze
+```
+
+> [!TIP]
+> Focus on the consistency model — does every object type have a defined conflict resolution rule? Is there a test case for each failure mode in the failure model?
 
 ---
 

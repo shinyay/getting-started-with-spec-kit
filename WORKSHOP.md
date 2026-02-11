@@ -46,6 +46,9 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 | **I** | [API Versioning Migration — v1→v2](scenarios/I-api-versioning-migration.md) | ⭐⭐⭐ Intermediate–Advanced | ~110 min | Backward compatibility, deprecation governance, API contracts |
 | **E** | [Collaborative Whiteboard — Real-time](scenarios/E-collaborative-whiteboard.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Concurrency, consistency models, latency budgets |
 | **F** | [Event Ingestion Pipeline — IoT](scenarios/F-event-ingestion-pipeline.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Data quality, schema evolution, backpressure, SLOs |
+| **P** | [OrderFlow — Fulfillment Saga](scenarios/P-order-fulfillment-saga.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Saga pattern, compensating transactions, timeout semantics |
+| **Q** | [PlugKit — Plugin Runtime](scenarios/Q-plugin-runtime.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Public API contracts, sandboxed execution, capability permissions |
+| **R** | [FlagShip — Feature Flags & Experimentation](scenarios/R-feature-flag-experimentation.md) | ⭐⭐⭐⭐ Advanced | ~120 min | Deterministic bucketing, statistical correctness, distributed evaluation |
 
 > [!TIP]
 > Open your chosen scenario file alongside this guide. This page explains each SDD phase; the scenario file provides the specific prompts and checkpoints.
@@ -61,6 +64,14 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 > - **Server-side development** (Node.js + Express + SQLite) for the first time
 > - **Shared baseline contract** — all ⭐⭐ scenarios share the same error envelope, pagination, and DB conventions (see [Intermediate Baseline Contract](#intermediate-baseline-contract) below)
 > - **API-only MVP is acceptable** — UI is Core/Stretch unless the SDD lesson is specifically about UX
+> - **Facilitator answer keys** are in [`scenarios/_answers/`](scenarios/_answers/)
+
+> [!NOTE]
+> **Advanced scenarios (E, F, P, Q, R)** require specifying:
+> - **Failure models** — what can fail, how, and what guarantees you provide
+> - **Safety invariants vs liveness goals** — things that must NEVER happen vs EVENTUALLY happen
+> - **Idempotency + observability** — correlation IDs, audit logs, reconciliation stories
+> - See [Advanced Baseline Contract](#advanced-baseline-contract) below
 > - **Facilitator answer keys** are in [`scenarios/_answers/`](scenarios/_answers/)
 
 ---
@@ -94,6 +105,33 @@ All ⭐⭐ intermediate scenarios share these conventions. This reduces "meta-va
 **Standard test approach:** supertest for API contract tests, pure unit tests for business logic.
 
 **UI policy for ⭐⭐ MVP:** API-only implementations are acceptable. UI is Core/Stretch unless the scenario's SDD lesson is specifically about UX.
+
+---
+
+## Advanced Baseline Contract
+
+All ⭐⭐⭐⭐ advanced scenarios share these requirements in addition to standard conventions. Advanced scenarios require specifying **failure modes and invariants explicitly**.
+
+**Failure model section required** — each advanced scenario must define:
+- What requests/messages can be retried, duplicated, or arrive out of order
+- What components can crash or become unavailable
+- What clock/timing assumptions apply (drift, timeouts)
+
+**Safety invariants vs liveness goals required:**
+- **Safety invariants** = things that must NEVER happen (e.g., "never ship an unpaid order," "never assign a user to two mutually exclusive experiments")
+- **Liveness goals** = things that must EVENTUALLY happen (e.g., "all clients eventually converge," "buffered events are eventually processed")
+
+**Idempotency rule required:**
+- Which endpoints/handlers are idempotent
+- Which keys are used (idempotency key, event ID, evaluation ID)
+- Deduplication storage strategy and TTL
+
+**Observability requirement:**
+- Correlation ID across all operations/events
+- Audit log for state transitions (who/what/when)
+- A "reconcile or replay" story for recovering from inconsistencies
+
+**Standard test approach for advanced:** Contract tests + chaos/failure injection tests + invariant verification tests.
 
 ---
 
@@ -346,6 +384,7 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | Beginners wanting more depth | **J** (Pomodoro), **K** (Markdown Notes), or **L** (Recipe Collection) — each teaches a different SDD concept at beginner level |
 | Ready for server-side development | **M** (URL Shortener), **N** (Kanban Board), or **O** (CSV Importer) — introduces Express + SQLite + API contracts |
 | Experienced developers, real-world challenge | **Scenario B** (Field Inspection PWA), **C** (OIDC SSO), or **D** (Stripe Billing) |
+| Mature engineers, distributed systems | **P** (Saga), **Q** (Plugin Runtime), or **R** (Feature Flags) — requires failure model + invariant thinking |
 | Mixed audience | Let participants self-select from their level tier; pair beginners together |
 | Conference talk (tight time, 60 min) | **Scenario A** or **J** (MVP tier only) |
 | Conference workshop (90 min) | Any beginner scenario (A, J, K, or L) |
@@ -371,6 +410,16 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | 3rd | N (Kanban Board) | Multi-entity + ordering | Relationships, algorithms, cascading |
 | 4th | O (CSV Importer) | Data import + validation | File parsing, data quality, aggregation |
 | Graduate → | B/C/D (⭐⭐⭐) | External services + auth | Bridges to intermediate-advanced |
+
+**Recommended advanced progression** (each adds one new distributed systems SDD concept):
+
+| Order | Scenario | New SDD Skill | What's New vs Intermediate-Advanced |
+|---|---|---|---|
+| 1st | E (Whiteboard) | Consistency model specification | Real-time multi-user state, client prediction + rollback |
+| 2nd | F (Pipeline) | Throughput SLO + backpressure | Quantitative SLOs, schema evolution, cost constraints |
+| 3rd | P (Saga) | Compensating transactions | Multi-step failure recovery, timeout=unknown |
+| 4th | Q (Plugin Runtime) | Public API as product | External developer contracts, security sandboxing |
+| 5th | R (Feature Flags) | Statistical + distributed correctness | Deterministic bucketing, SRM detection, experiment isolation |
 
 ### Success Indicators by Phase
 
@@ -543,6 +592,45 @@ Use these to evaluate whether participants are truly doing SDD, not just generat
 | Tasks | 10 min | +3 min | Happy-path-first ordering is key; look for load test tasks with specific throughput targets |
 | Implementation | 15 min | — | Watch for schema validation at ingestion, Parquet batching, and 429 backpressure responses |
 | Wrap-Up | 15 min | — | Discussion: how does SDD prevent silent data loss in distributed pipelines? |
+
+**Scenario P (Order Fulfillment Saga) — 120 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Ensure PostgreSQL + Redis available; mention Advanced Baseline Contract |
+| Constitution | 10 min | +3 min | "Timeout means unknown" and "explicit compensation" are the key principles |
+| Specification | 20 min | +5 min | Saga steps, compensation pairs, and timeout semantics need careful reading |
+| Clarification | 15 min | +5 min | "Payment capture timed out — did it charge?" is the "aha" moment |
+| Plan | 20 min | +5 min | Saga state persisted BEFORE step execution; outbox pattern for event publishing |
+| Tasks | 10 min | +3 min | Saga state machine and step executor before any adapter; happy path before failure paths |
+| Implementation | 15 min | — | Watch: idempotency keys, compensation in reverse order, timeout queries status |
+| Wrap-Up | 15 min | — | Discussion: why does the failure model have more states than the happy path? |
+
+**Scenario Q (Plugin Runtime) — 120 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Ensure Node.js Worker Threads available; mention Advanced Baseline Contract |
+| Constitution | 10 min | +3 min | "API contract is the product" and "fail-closed security" are the key principles |
+| Specification | 20 min | +5 min | Capability permissions, resource limits, and threat model need careful reading |
+| Clarification | 15 min | +5 min | "Can plugins have npm dependencies?" reveals supply-chain attack vector |
+| Plan | 20 min | +5 min | Capability check in HOST (not worker); message protocol fully defined |
+| Tasks | 10 min | +3 min | Manifest validation first; failure isolation tests are separate explicit tasks |
+| Implementation | 15 min | — | Watch: Worker Thread (not vm), permissions checked in host, timeout enforcement |
+| Wrap-Up | 15 min | — | Discussion: how does specifying a trust boundary change your API design? |
+
+**Scenario R (Feature Flags & Experimentation) — 120 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Ensure PostgreSQL + Redis available; mention Advanced Baseline Contract |
+| Constitution | 10 min | +3 min | "Deterministic evaluation" and "exposure logging is not optional" are the key principles |
+| Specification | 20 min | +5 min | Bucketing algorithm, exposure logging semantics, and SRM detection need careful reading |
+| Clarification | 15 min | +5 min | Monotonic expansion and SRM chi-squared test are the "aha" moments |
+| Plan | 20 min | +5 min | Hash function must be identical across all services; kill switch bypasses all caches |
+| Tasks | 10 min | +3 min | Bucketing function first (pure, testable); exposure logging separate from evaluation |
+| Implementation | 15 min | — | Watch: deterministic hash (not Math.random), kill switch before rules, fire-and-forget logging |
+| Wrap-Up | 15 min | — | Discussion: how does SRM detection prevent decisions based on corrupted data? |
 
 **Scenario G (Terraform + GitHub Actions) — 120 minutes:**
 
