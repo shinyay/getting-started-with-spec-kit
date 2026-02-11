@@ -1,0 +1,118 @@
+name: "Workshop: Create a dated branch"
+description: "Create a new workshop branch like workshop/2026-01-07 from a baseline ref, triggered by an Issue."
+title: "[workshop] create branch: workshop/YYYY-MM-DD"
+labels: ["workshop", "workshop-branch-request", "needs-triage"]
+body:
+  # ── Overview ──────────────────────────────────────────────────
+  - type: markdown
+    attributes:
+      value: |
+        ## What this Issue does
+
+        When you submit this Issue, a GitHub Actions workflow will:
+
+        1. Read the values you entered below
+        2. Validate inputs (date format, branch name characters, permissions)
+        3. Create a new branch named **`<prefix>/<date>[-<suffix>]`**
+        4. Create the branch from the specified **base ref** (branch or tag)
+        5. Comment back on this Issue with checkout instructions
+
+        ### Defaults & safety
+
+        | Behavior | Detail |
+        |----------|--------|
+        | **Date left blank** | Uses the Issue created date (UTC) |
+        | **Permission check** | Only users with **write / maintain / admin** access can trigger branch creation |
+        | **Duplicate branch** | Controlled by the "If the branch already exists" dropdown below |
+        | **Dry run** | Preview the branch name without creating it — useful for testing |
+
+        > **Note:** The workflow file must exist on the repository's **default branch** to run on Issue events.
+
+  # ── Inputs ────────────────────────────────────────────────────
+  - type: input
+    id: workshop_date
+    attributes:
+      label: "Workshop date (YYYY-MM-DD)"
+      description: >
+        Used for the branch name. Must be in YYYY-MM-DD format (e.g., 2026-01-07).
+        Leave blank to use the Issue created date (UTC).
+      placeholder: "2026-01-07"
+    validations:
+      required: false
+
+  - type: input
+    id: base_ref
+    attributes:
+      label: "Base ref (branch or tag)"
+      description: "The ref to branch from. Typically your baseline branch."
+      placeholder: "main"
+      value: "main"
+    validations:
+      required: true
+
+  - type: input
+    id: branch_prefix
+    attributes:
+      label: "Branch prefix"
+      description: >
+        Branch will be created as: `<prefix>/<date>[-<suffix>]`.
+        Only letters, numbers, and hyphens are allowed (no slashes or spaces).
+      placeholder: "workshop"
+      value: "workshop"
+    validations:
+      required: true
+
+  - type: input
+    id: branch_suffix
+    attributes:
+      label: "Optional suffix (slug)"
+      description: >
+        Appended as `-<suffix>` to avoid date collisions.
+        Only lowercase letters, numbers, and hyphens are allowed (e.g., `tokyo-a`, `team2`).
+      placeholder: "tokyo-a"
+    validations:
+      required: false
+
+  # ── Behavior options ──────────────────────────────────────────
+  - type: dropdown
+    id: on_exists
+    attributes:
+      label: "If the branch already exists"
+      options:
+        - "Comment and do nothing"
+        - "Fail the workflow"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: post_action
+    attributes:
+      label: "After the branch is created"
+      options:
+        - "Comment with checkout instructions"
+        - "Comment and close this issue"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: dry_run
+    attributes:
+      label: "Dry run"
+      description: "Preview the branch name and validate inputs without creating the branch."
+      options:
+        - "No — create the branch"
+        - "Yes — dry run only (validate and preview)"
+    validations:
+      required: true
+
+  # ── Confirmations ─────────────────────────────────────────────
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: "Confirmations (required)"
+      description: "All boxes must be checked before the workflow will run."
+      options:
+        - label: "I confirm this Issue should create a new branch in this repository."
+          required: true
+        - label: "I confirm the branch name is derived from the date and may be visible to others."
+          required: true
