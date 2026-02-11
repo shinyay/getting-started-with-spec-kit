@@ -4,6 +4,8 @@
 
 A ready-to-use Dev Container for experiencing [GitHub Spec Kit](https://github.com/github/spec-kit) — zero installation required.
 
+<img src="QR.png" alt="QR code to this repository" width="200">
+
 ## What is Spec Kit?
 
 Spec Kit is an open source toolkit for **Spec-Driven Development (SDD)**. It helps you focus on product scenarios and predictable outcomes instead of vibe coding every piece from scratch.
