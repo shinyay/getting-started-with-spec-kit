@@ -21,6 +21,10 @@ This scenario stress-tests SDD because:
 - **Cross-platform behavior diverges in subtle ways** — line endings, path separators, terminal encoding, ANSI color support all need explicit handling
 - **Error UX is the difference between a good and bad CLI** — clear error messages with actionable suggestions vs. stack traces dumped to stdout
 
+This is the same skill that appears at higher difficulty in:
+- Scenario I (⭐⭐⭐): API versioning — output contracts must evolve without breaking downstream consumers
+- Scenario F (⭐⭐⭐⭐): Event ingestion pipeline — streaming performance at scale with defined SLOs and failure budgets
+
 ---
 
 ## Phase Prompts
@@ -138,14 +142,28 @@ Non-goals (explicitly out of scope):
 - Remote log sources (S3, CloudWatch, etc.) — future iteration.
 - Interactive/TUI mode — future iteration.
 - Log format configuration file — auto-detection only for v1.
+
+Scope tiers:
+- MVP (required): `summarize` command with JSON Lines input + text output + exit codes 0/1/2 + golden test. One command, one format, one output.
+- Core (recommended): + `top-errors` + `timeline` + JSON output (--format) + stdin input + plain text parser with multi-line grouping + --since/--until + --service filter + error signature normalization
+- Stretch (optional): + gzip decompression + progress indicator (>100MB files) + shell completions + SIGINT graceful handling + cross-platform binary packaging + performance benchmark with 2GB fixture
 ```
 
-**Deliberate ambiguities to watch for:**
-- What language/runtime is the CLI built in? (Affects distribution strategy significantly)
-- Should `--since "1h ago"` be relative to now or to the last timestamp in the file?
-- What is the exact JSON schema for each command's output?
-- How are multi-line stack traces associated with their parent error in plain text format?
-- Should the tool follow symlinks?
+**Deliberate ambiguities — decisions that `/speckit.clarify` should surface:**
+
+1. Decision needed: What language/runtime is the CLI built in? (Affects distribution, performance, and cross-platform strategy significantly.)
+2. Decision needed: Should `--since "1h ago"` be relative to the current wall clock time, or relative to the last timestamp in the file?
+3. Decision needed: What is the exact JSON schema for each command's output? Are field names and structure part of the stable public API?
+4. Decision needed: How are multi-line stack traces associated with their parent error in plain text format?
+5. Decision needed: Should the tool follow symlinks? What if a symlink loop is detected?
+6. Decision needed: When stdout is piped and there are 0 matching entries (e.g., `--service` filters to nothing), should the output be empty, an empty JSON object, or a "no results" message?
+7. Decision needed: Should `--verbose` warnings appear inline during processing (interleaved with progress) or buffered to stderr after processing completes?
+8. Decision needed: Should output numbers use locale-specific formatting (1,000 vs 1.000) or always use C/POSIX locale for deterministic output?
+9. Decision needed: When a log file mixes UTC and non-UTC timestamps, should timeline buckets be in UTC or the most common timezone in the file?
+10. Decision needed: Should `logsaw` support reading from multiple files in one invocation (e.g., `logsaw summarize *.log`), or strictly one file/stdin?
+
+> [!NOTE]
+> Reference answers for facilitators are in [`_answers/H-cross-platform-cli-answers.md`](_answers/H-cross-platform-cli-answers.md).
 
 **Checkpoint** — verify the generated spec contains:
 - [ ] User stories with acceptance criteria
@@ -153,30 +171,19 @@ Non-goals (explicitly out of scope):
 - [ ] All three commands defined with input/output behavior
 - [ ] Exit codes defined with meanings
 - [ ] Performance targets with concrete numbers
-- [ ] A review and acceptance checklist
+- [ ] MVP / Core / Stretch scope tiers
 
 ---
 
 ### Clarification
 
 ```
-/speckit.clarify Review the logsaw CLI spec and ask me about every ambiguity, unstated assumption, and gap — especially around: implementation language, relative time semantics, JSON output schema, multi-line stack trace grouping, symlink handling, and any CLI UX conventions I may have missed.
+/speckit.clarify
 ```
 
-Suggested answers for the workshop:
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
-| Question Theme | Suggested Answer |
-|---|---|
-| Implementation language | Rust. Single static binary, no runtime dependencies, fast performance, cross-compiles to all three platforms. Use clap for argument parsing, serde for JSON, and indicatif for progress bars. |
-| Relative time (--since "1h ago") | Relative to the current wall clock time (not to the file). This matches the mental model of "show me errors from the last hour." |
-| JSON output schema | Each command has a documented JSON schema. `summarize` returns `{total_lines, time_range: {first, last}, levels: {error: N, warn: N, ...}, top_errors: [{signature, count, first_seen, last_seen}]}`. Schema is versioned and documented in the README. |
-| Multi-line stack trace grouping | In plain text mode, any line that does not match the timestamp prefix pattern is treated as a continuation of the previous line. Stack traces are appended to the parent error's message. In JSON Lines, stack_trace is a separate field (no grouping needed). |
-| Symlinks | Follow symlinks by default. If a symlink loop is detected, report error to stderr and exit 1. |
-| Shell completions | Generate shell completions for bash, zsh, fish, and PowerShell via `logsaw completions <shell>`. Clap supports this natively. |
-| Config file | No config file for v1. All options are CLI flags. A future version may support a .logsawrc for defaults. |
-| Signal handling | Handle SIGINT (Ctrl+C) gracefully: stop processing, print partial results to stdout (with a "partial: true" field in JSON), exit 130 (128 + SIGINT). |
-
-**Manual refinement:**
+**Manual refinement** — add details the AI missed:
 
 ```
 For test fixtures: create 3 sample log files — a small JSON Lines file (100 lines, 3 services, 5 error signatures), a large fixture generator script that creates a 2GB file for performance testing, and a plain text log file with multi-line stack traces. Include edge case fixtures: empty file, all-unparseable file, and mixed-format file.
@@ -190,6 +197,7 @@ Read the review and acceptance checklist in the spec, and check off each item th
 
 **Checkpoint:**
 - [ ] No remaining `[NEEDS CLARIFICATION]` markers (or documented decisions for each)
+- [ ] All 10 deliberate ambiguities have documented resolutions
 - [ ] All three commands have defined input/output behavior and JSON schema
 - [ ] Exit codes are semantic and documented
 - [ ] Performance targets are concrete (60s for 2GB, <100MB RAM)
@@ -277,6 +285,18 @@ Task preferences:
 - Cross-platform CI setup appears early (not at the end)
 - Packaging/release tasks include binary building + Homebrew + checksums
 - Performance benchmark task exists with concrete targets
+- MVP / Core / Stretch ordering respected
+
+---
+
+### Analyze (Optional)
+
+```
+/speckit.analyze
+```
+
+> [!TIP]
+> Especially valuable for CLI tools — verify every exit code, every output field, and every edge case in the spec has a corresponding golden test in the tasks.
 
 ---
 
@@ -295,6 +315,7 @@ Task preferences:
 - File reading is streaming (BufReader line-by-line)
 - Cross-platform path handling uses std::path, not string manipulation
 - No panics in the codebase (proper error handling with anyhow/thiserror)
+- No features outside the specified scope tier
 
 ---
 

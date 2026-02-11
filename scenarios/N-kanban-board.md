@@ -23,7 +23,7 @@ Except:
 This scenario teaches that **ordering is data, not UI** — it must be specified, persisted, and survive page reload. And that **cascading operations must be explicit** — "delete a column" is three different operations depending on what the spec says about its cards.
 
 This is the same skill that appears at higher difficulty in:
-- Scenario E (⭐⭐⭐): Collaborative z-index ordering with real-time conflict resolution
+- Scenario E (⭐⭐⭐⭐): Collaborative z-index ordering with real-time conflict resolution
 - Scenario B (⭐⭐⭐): Offline sync of ordered items across devices
 
 **Tech stack:** Node.js + Express + SQLite (see [Intermediate Baseline Contract](#intermediate-baseline-contract) in WORKSHOP.md)
@@ -134,12 +134,18 @@ Scope tiers:
 /speckit.clarify
 ```
 
-Review the questions surfaced. Use the 10 decision questions above as a checklist — did the AI catch all of them?
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
-**Manual refinement:**
+**Manual refinement** — add details the AI missed:
 
 ```
 For sample data: the 6 cards should have non-sequential positions (e.g., 1000, 2500, 3000) to demonstrate that ordering works by position value, not insertion order. At least one card should have a due date set to tomorrow. Assign labels to 3 of the 6 cards.
+```
+
+**Validate the checklist:**
+
+```
+Read the review and acceptance checklist in the spec, and check off each item that the specification now satisfies. Leave unchecked any that still need work.
 ```
 
 **Checkpoint:**
@@ -231,6 +237,8 @@ Nested data within nested data: Board → Column → Card → Checklist → Item
 ```
 /speckit.specify Add checklists to KanbanFlow cards. Each card can have one checklist containing ordered items. Items can be checked/unchecked. The card detail view shows progress (3/5 items done). How does this affect the board hydration endpoint? Should checklist items use fractional indexing too?
 ```
+
+Then continue through `/speckit.plan`, `/speckit.tasks`, and `/speckit.implement`.
 
 ### Stress-test: Real-time Sync
 

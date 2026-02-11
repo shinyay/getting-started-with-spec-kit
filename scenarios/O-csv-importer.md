@@ -24,7 +24,7 @@ This scenario teaches that **validation rules are spec, not code** — every fie
 
 This is the same skill that appears at higher difficulty in:
 - Scenario D (⭐⭐⭐): Financial reporting with multi-currency, exchange rates, and regulatory constraints
-- Scenario F (⭐⭐⭐): Data ingestion pipelines with schema evolution and quality scoring
+- Scenario F (⭐⭐⭐⭐): Data ingestion pipelines with schema evolution and quality scoring
 - Scenario L (⭐): Calculation correctness at a simpler scale (recipe scaling)
 
 **Tech stack:** Node.js + Express + SQLite (see [Intermediate Baseline Contract](#intermediate-baseline-contract) in WORKSHOP.md)
@@ -173,12 +173,18 @@ Scope tiers:
 /speckit.clarify
 ```
 
-Review the questions surfaced. Use the 10 decision questions above as a checklist — did the AI catch all of them?
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
-**Manual refinement:**
+**Manual refinement** — add details the AI missed:
 
 ```
 For sample data: the test CSV must include at least these edge cases in specific rows: (1) an amount with 3 decimal places that gets rounded, (2) a completely empty row, (3) a negative amount with type "debit" (auto-correct case), (4) a negative amount with type "credit" (error case), (5) a missing date field, (6) a description with 250+ characters. The 20 confirmed transactions should span January through March 2025 with at least 3 different categories.
+```
+
+**Validate the checklist:**
+
+```
+Read the review and acceptance checklist in the spec, and check off each item that the specification now satisfies. Leave unchecked any that still need work.
 ```
 
 **Checkpoint:**
@@ -273,6 +279,8 @@ Export filtered transactions back to CSV, matching the original input format. Ho
 ```
 /speckit.specify Add CSV export to MoneyTrail. Users can export filtered transactions (by date range, category, import) back to a CSV file. The exported CSV must use the same column format as the import (date, description, amount, type). How do you convert integer cents back to decimal amounts without floating-point drift? What about truncated descriptions — do you export the truncated version or flag it?
 ```
+
+Then continue through `/speckit.plan`, `/speckit.tasks`, and `/speckit.implement`.
 
 ### Stress-test: Multi-Currency
 

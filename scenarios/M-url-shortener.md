@@ -156,12 +156,18 @@ Scope tiers:
 /speckit.clarify
 ```
 
-Review the questions surfaced. Use the 10 decision questions above as a checklist — did the AI catch all of them?
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
-**Manual refinement:**
+**Manual refinement** — add details the AI missed:
 
 ```
 For sample data: one short link should have 50+ recorded clicks spread over 10 days so the stats endpoint has meaningful data to demonstrate. Include at least 3 different referrer domains. The expired link should have expired yesterday.
+```
+
+**Validate the checklist:**
+
+```
+Read the review and acceptance checklist in the spec, and check off each item that the specification now satisfies. Leave unchecked any that still need work.
 ```
 
 **Checkpoint:**
@@ -251,6 +257,8 @@ Review the plan and check: (1) Are /api routes mounted before /:slug? (2) Is the
 ```
 /speckit.specify Add custom domain support to ShortLink. Users can register a domain (e.g., short.myco.com) and links created under that domain use its namespace. The same slug can exist on different domains. The API needs a domain parameter on creation, and the redirect route must resolve the correct link based on the Host header.
 ```
+
+Then continue through `/speckit.plan`, `/speckit.tasks`, and `/speckit.implement`.
 
 ### Stress-test: Add Authentication
 
