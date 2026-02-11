@@ -42,6 +42,19 @@ Then follow the Spec-Driven Development workflow:
 /speckit.implement       # Execute implementation
 ```
 
+## Workshop Scenarios
+
+**15 hands-on scenarios** across 4 difficulty levels — from beginner CRUD to distributed systems.
+
+👉 **[Browse all scenarios →](SCENARIOS.md)**
+
+| Level | Scenarios | What You Learn |
+|---|---|---|
+| ⭐ Beginner | A, J, K, L | SDD workflow, data modeling, state machines, calculation correctness |
+| ⭐⭐ Intermediate | H, M, N, O | API contracts, HTTP semantics, ordering algorithms, data validation |
+| ⭐⭐⭐ Intermediate–Advanced | B, C, D, G, I | Offline sync, auth, billing, IaC, API versioning |
+| ⭐⭐⭐⭐ Advanced | E, F | Real-time concurrency, high-throughput pipelines |
+
 ## What's Included
 
 | Tool | Purpose |
