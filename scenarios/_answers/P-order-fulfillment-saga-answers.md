@@ -1,6 +1,6 @@
 # Scenario P: Order Fulfillment Saga — Facilitator Answer Key
 
-> **This file is for facilitators only.** Do not share with participants before the `/speckit.clarify` phase.
+> **This file is for facilitators only.** Do not distribute to participants before the workshop — it removes the learning value of the clarification phase.
 
 ## Saga State Machine
 

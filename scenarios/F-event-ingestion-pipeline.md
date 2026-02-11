@@ -21,6 +21,10 @@ This scenario stress-tests SDD because:
 - **Cost is a first-class constraint** — unbounded retention or uncontrolled fan-out can make a pipeline economically unviable
 - **Backpressure design must be explicit** — what happens when downstream is slower than upstream?
 
+This is the same skill that appears at a simpler scale in:
+- Scenario H (⭐⭐): CLI log processing with normalization and structured output — the same "parse → validate → transform" pipeline at single-file scale
+- Scenario D (⭐⭐⭐): Stripe webhook processing with idempotency and state reconciliation — the same at-least-once + dedup pattern at single-service scale
+
 ---
 
 ## Phase Prompts
@@ -185,7 +189,7 @@ Scope tiers:
 /speckit.clarify Review the event ingestion pipeline spec and ask me about every ambiguity, unstated assumption, and gap — especially around: batch response semantics, device group management, new-metric aggregation backfill, cost constraints, API key provisioning, event ordering guarantees, and any distributed systems edge cases you can identify.
 ```
 
-Review the questions surfaced. Use the 10 decision questions above as a checklist — did the AI catch all of them?
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
 **Manual refinement:**
 

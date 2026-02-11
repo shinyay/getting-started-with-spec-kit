@@ -183,12 +183,18 @@ Scope tiers:
 /speckit.clarify
 ```
 
-Review the questions surfaced. Use the 10 decision questions above as a checklist — did the AI catch all of them?
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
 **Manual refinement:**
 
 ```
 For sample data: the "crash-test" plugin should throw different errors in different hooks — unhandled exception in transform, infinite loop in onEvent, and memory exhaustion in onLoad — to test all three failure isolation paths.
+```
+
+**Validate the checklist:**
+
+```
+Read the review and acceptance checklist in the spec, and check off each item that the specification now satisfies. Leave unchecked any that still need work.
 ```
 
 **Checkpoint:**
@@ -283,6 +289,8 @@ Plugins are distributed via a remote registry. Users browse, install, and rate p
 ```
 /speckit.specify Add a plugin marketplace to PlugKit. Plugins are published to a central registry with metadata (name, description, author, version, permissions, download count, rating). Users browse and install from the marketplace. Published plugins must be signed by the author (Ed25519 signature of plugin bundle). The platform verifies the signature before installation. How do you handle: (1) a plugin update that adds new permissions? (2) a plugin removed from the marketplace but still installed by users? (3) a malicious plugin that passes signature verification but contains harmful code?
 ```
+
+Then continue through `/speckit.clarify`, `/speckit.plan`, `/speckit.tasks`, and `/speckit.implement`.
 
 ### Stress-test: Breaking API Change
 

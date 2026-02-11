@@ -21,6 +21,10 @@ This scenario stress-tests SDD because:
 - **Latency is perceptible** — users notice >100ms delay; the spec must define quantitative latency budgets
 - **Object types have different conflict semantics** — two users moving a shape ≠ two users editing the same sticky note text
 
+This is the same skill that appears at a simpler scale in:
+- Scenario J (⭐): Timer state machine with explicit transition rules — the simplest form of "stateful behavior that must be specified"
+- Scenario B (⭐⭐⭐): Offline sync conflict resolution — the same merge semantics without real-time pressure
+
 ---
 
 ## Phase Prompts
@@ -190,7 +194,7 @@ Scope tiers:
 /speckit.clarify Review the collaborative whiteboard spec and ask me about every ambiguity, unstated assumption, and gap — especially around: concurrent text editing behavior (locking vs merging), undo stack persistence across reconnects, Board Owner undo powers, z-order conflict resolution, invite flow details, and any concurrency edge cases you can identify.
 ```
 
-Review the questions surfaced. Use the 10 decision questions above as a checklist — did the AI catch all of them?
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
 **Manual refinement:**
 

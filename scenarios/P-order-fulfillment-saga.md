@@ -167,12 +167,18 @@ Scope tiers:
 /speckit.clarify
 ```
 
-Review the questions surfaced. Use the 10 decision questions above as a checklist — did the AI catch all of them?
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
 **Manual refinement:**
 
 ```
 For sample data: the COMPENSATED order should show the full compensation chain in saga_steps (authorize succeeded → reserve failed → void authorization). The REQUIRES_MANUAL_REVIEW order should show 3 timeout attempts on payment capture with the status queries.
+```
+
+**Validate the checklist:**
+
+```
+Read the review and acceptance checklist in the spec, and check off each item that the specification now satisfies. Leave unchecked any that still need work.
 ```
 
 **Checkpoint:**
@@ -267,6 +273,8 @@ What if some items are in stock but others aren't? The saga needs to split into 
 ```
 /speckit.specify Add partial fulfillment to OrderFlow. When some order items are available and others are not, split the order into "shippable now" and "backordered" groups. Ship available items immediately; reserve backordered items when stock arrives. Payment is captured only for shipped items; backorder items are charged on ship. How does cancellation work for partially fulfilled orders? What if the customer wants to cancel only the backordered items?
 ```
+
+Then continue through `/speckit.clarify`, `/speckit.plan`, `/speckit.tasks`, and `/speckit.implement`.
 
 ### Stress-test: Add Real External Services
 

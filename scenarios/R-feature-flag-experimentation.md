@@ -190,12 +190,18 @@ Scope tiers:
 /speckit.clarify
 ```
 
-Review the questions surfaced. Use the 10 decision questions above as a checklist — did the AI catch all of them?
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
 **Manual refinement:**
 
 ```
 For sample data: the 1000 exposure events should be spread across 7 days with realistic timestamps. The conversion events should have a higher rate in treatment (70/500 = 14%) vs control (50/500 = 10%) — this is a realistic 4% absolute lift. Include one day with anomalous exposure counts (SRM signal) to test detection.
+```
+
+**Validate the checklist:**
+
+```
+Read the review and acceptance checklist in the spec, and check off each item that the specification now satisfies. Leave unchecked any that still need work.
 ```
 
 **Checkpoint:**
@@ -290,6 +296,8 @@ External services need to evaluate flags locally (not via HTTP API) for performa
 ```
 /speckit.specify Build a server-side SDK for FlagShip. The SDK connects to the flag service, syncs configurations, and evaluates flags locally (no HTTP call per evaluation). Requirements: (1) evaluation results must be IDENTICAL to the API for the same inputs, (2) SDK maintains a local cache of flag configs, updated via streaming connection or polling, (3) kill switch propagation works via the streaming connection, (4) exposure events are buffered and batch-sent every 10 seconds. How do you test that SDK evaluation matches API evaluation exactly?
 ```
+
+Then continue through `/speckit.clarify`, `/speckit.plan`, `/speckit.tasks`, and `/speckit.implement`.
 
 ### Stress-test: Multi-Surface Experimentation
 
