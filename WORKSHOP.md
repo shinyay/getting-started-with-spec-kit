@@ -36,6 +36,9 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 | **K** | [MarkdownPad — Note-Taking App](scenarios/K-markdown-notes.md) | ⭐ Beginner | ~90 min | Rendering correctness, feature whitelist, XSS prevention |
 | **L** | [RecipeBox — Collection & Meal Planner](scenarios/L-recipe-collection.md) | ⭐ Beginner | ~90 min | Nested data modeling, fraction arithmetic, calculation correctness |
 | **H** | [Log Analysis CLI — Cross-platform](scenarios/H-cross-platform-cli.md) | ⭐⭐ Intermediate | ~100 min | CLI UX, deterministic output, streaming, packaging |
+| **M** | [ShortLink — URL Shortener with Analytics](scenarios/M-url-shortener.md) | ⭐⭐ Intermediate | ~100 min | API contract design, HTTP redirect semantics, cursor pagination |
+| **N** | [KanbanFlow — Task Board with Ordering](scenarios/N-kanban-board.md) | ⭐⭐ Intermediate | ~100 min | Multi-entity relationships, fractional indexing, cascade operations |
+| **O** | [MoneyTrail — CSV Importer + Reports](scenarios/O-csv-importer.md) | ⭐⭐ Intermediate | ~100 min | Data import/validation pipeline, aggregation correctness, money handling |
 | **B** | [Field Inspection PWA — Offline-first](scenarios/B-field-inspection-pwa.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Offline-first, sync conflicts, media uploads |
 | **C** | [OIDC SSO + RBAC — Brownfield Auth](scenarios/C-oidc-sso-rbac.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Brownfield, security/auth, multi-tenancy |
 | **D** | [Stripe Subscriptions + Dunning](scenarios/D-stripe-subscriptions.md) | ⭐⭐⭐ Intermediate–Advanced | ~120 min | Money correctness, idempotency, state machines |
@@ -52,6 +55,45 @@ Choose a scenario based on your experience level and interests. Each scenario pr
 > - **MVP / Core / Stretch** scope tiers let facilitators control depth
 > - **Decision questions** are explicitly formatted for `/speckit.clarify`
 > - **Facilitator answer keys** are in [`scenarios/_answers/`](scenarios/_answers/) — keep these separate from participants until after the clarify phase
+
+> [!NOTE]
+> **Intermediate scenarios (M, N, O)** build on the beginner design and add:
+> - **Server-side development** (Node.js + Express + SQLite) for the first time
+> - **Shared baseline contract** — all ⭐⭐ scenarios share the same error envelope, pagination, and DB conventions (see [Intermediate Baseline Contract](#intermediate-baseline-contract) below)
+> - **API-only MVP is acceptable** — UI is Core/Stretch unless the SDD lesson is specifically about UX
+> - **Facilitator answer keys** are in [`scenarios/_answers/`](scenarios/_answers/)
+
+---
+
+## Intermediate Baseline Contract
+
+All ⭐⭐ intermediate scenarios share these conventions. This reduces "meta-variance" — participants focus on the SDD concept, not boilerplate decisions.
+
+**Standard error envelope** (all HTTP API routes in ⭐⭐ scenarios use this):
+```json
+{ "error": { "code": "INVALID_URL", "message": "...", "suggestion": "..." } }
+```
+> **Carve-outs:** Browser redirect routes may return **HTML** error pages (Scenario M: `GET /:slug`). CLI tools use CLI output contracts (Scenario H).
+
+**Standard pagination** (cursor-based):
+- Query: `?limit=20&cursor=<opaque>`
+- Response: `{ "data": [...], "pagination": { "cursor": "...", "hasMore": true } }`
+- Default limit: 20, max: 100. Cursor is opaque (base64-encoded); ordering is `createdAt DESC` unless stated.
+
+**Standard date format:** ISO 8601
+- Timestamps: `2026-02-10T12:34:56Z` (UTC)
+- Date-only: `YYYY-MM-DD`
+
+**Standard DB conventions:**
+- `PRAGMA foreign_keys = ON` in every connection
+- Every table has `id` (TEXT PRIMARY KEY), `createdAt`, `updatedAt`
+- Transactions for multi-table writes
+
+**Standard scripts:** `npm start` (dev server), `npm test` (supertest integration + unit)
+
+**Standard test approach:** supertest for API contract tests, pure unit tests for business logic.
+
+**UI policy for ⭐⭐ MVP:** API-only implementations are acceptable. UI is Core/Stretch unless the scenario's SDD lesson is specifically about UX.
 
 ---
 
@@ -302,12 +344,13 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 |---|---|
 | First-time SDD learners | **Scenario A** (QuickRetro) — simplest CRUD baseline |
 | Beginners wanting more depth | **J** (Pomodoro), **K** (Markdown Notes), or **L** (Recipe Collection) — each teaches a different SDD concept at beginner level |
+| Ready for server-side development | **M** (URL Shortener), **N** (Kanban Board), or **O** (CSV Importer) — introduces Express + SQLite + API contracts |
 | Experienced developers, real-world challenge | **Scenario B** (Field Inspection PWA), **C** (OIDC SSO), or **D** (Stripe Billing) |
 | Mixed audience | Let participants self-select from their level tier; pair beginners together |
 | Conference talk (tight time, 60 min) | **Scenario A** or **J** (MVP tier only) |
 | Conference workshop (90 min) | Any beginner scenario (A, J, K, or L) |
-| Half-day workshop (3+ hours) | Start with A, then J/K/L, then one intermediate scenario |
-| Full-day training | Beginner progression (A → J → K → L), then self-select from intermediate/advanced |
+| Half-day workshop (3+ hours) | Start with A, then one intermediate (M, N, or O) |
+| Full-day training | Beginner progression (A → J/K/L), then intermediate progression (H → M → N → O), then self-select advanced |
 
 **Recommended beginner progression** (each adds one new SDD concept):
 
@@ -317,7 +360,17 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | 2nd | J (Pomodoro) | State machine specification |
 | 3rd | K (Markdown Notes) | Output correctness + security |
 | 4th | L (Recipe Collection) | Calculation correctness + algorithms |
-| Graduate → | H (CLI, ⭐⭐) | Bridges to intermediate |
+| Graduate → | H or M (⭐⭐) | Bridges to intermediate |
+
+**Recommended intermediate progression** (each adds one new server-side SDD concept):
+
+| Order | Scenario | New SDD Skill | What's New vs Beginner |
+|---|---|---|---|
+| 1st | H (CLI) | Output contracts | Cross-platform, backward compat |
+| 2nd | M (URL Shortener) | API contract design | REST API, HTTP semantics, redirect correctness |
+| 3rd | N (Kanban Board) | Multi-entity + ordering | Relationships, algorithms, cascading |
+| 4th | O (CSV Importer) | Data import + validation | File parsing, data quality, aggregation |
+| Graduate → | B/C/D (⭐⭐⭐) | External services + auth | Bridges to intermediate-advanced |
 
 ### Success Indicators by Phase
 
@@ -386,6 +439,45 @@ Use these to evaluate whether participants are truly doing SDD, not just generat
 | Tasks | 5 min | — | Fraction utility should be the FIRST task — it's the algorithmic foundation |
 | Implementation | 10 min | — | Watch for `{ numerator, denominator }`, not `parseFloat`; vulgar fraction display |
 | Wrap-Up | 10 min | — | Discussion: how does SDD prevent calculation bugs? Connect to billing precision in D. |
+
+**Scenario M (URL Shortener) — 100 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Ensure `npm` works; mention Intermediate Baseline Contract |
+| Constitution | 10 min | +3 min | Error format split (JSON API vs HTML browser) is the key principle to verify |
+| Specification | 20 min | +5 min | Dense spec; route safety, idempotency, redirect semantics all need reading |
+| Clarification | 10 min | +5 min | 301 vs 302, HEAD analytics, and "shorten after delete" are the "aha" moments |
+| Plan | 15 min | +5 min | Route mounting order must be explicit; URL normalization must be a pure function |
+| Tasks | 5 min | — | Contract tests should appear alongside each endpoint, not deferred |
+| Implementation | 10 min | — | Watch: `/api/*` before `/:slug`, analytics in try/catch, 302 default |
+| Wrap-Up | 15 min | — | Discussion: how do HTTP status codes become contract requirements? |
+
+**Scenario N (Kanban Board) — 100 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Ensure `npm` works; mention Intermediate Baseline Contract |
+| Constitution | 10 min | +3 min | "Ordering is data" is the core principle; ask: how would you implement card ordering? |
+| Specification | 20 min | +5 min | Fractional indexing + cascade delete + intent-based API need careful reading |
+| Clarification | 10 min | +5 min | Column delete behavior and rebalance strategy produce the best discussions |
+| Plan | 15 min | +5 min | Rebalance must be in same transaction as move; board hydration avoids N+1 |
+| Tasks | 5 min | — | Fractional indexing helper should be first — it's the algorithmic foundation |
+| Implementation | 10 min | — | Watch: REAL position type, UNIQUE constraint, intent-based move API |
+| Wrap-Up | 15 min | — | Discussion: why is client-sends-intent better than client-computes-position? |
+
+**Scenario O (CSV Importer) — 100 minutes:**
+
+| Phase | Time | Buffer | Notes |
+|---|---|---|---|
+| Setup & Context | 15 min | +5 min | Ensure `npm` works; mention Intermediate Baseline Contract |
+| Constitution | 10 min | +3 min | "Every row gets a verdict" and "aggregation correctness" are the key principles |
+| Specification | 20 min | +5 min | Import pipeline (6 stages), row verdicts, and parseCents() need careful reading |
+| Clarification | 10 min | +5 min | parseCents() demo is the "aha" moment: write `Math.round(parseFloat('1.005') * 100)` on the board |
+| Plan | 15 min | +5 min | File hash before row processing; traceability fields (importId, sourceRowNum) in data model |
+| Tasks | 5 min | — | parseCents() and date validation should be early pure-function tasks |
+| Implementation | 10 min | — | Watch: string-splitting parseCents(), SHA-256 on raw bytes, SUM(amountCents) in SQL |
+| Wrap-Up | 15 min | — | Discussion: how does SDD prevent silent data corruption in import pipelines? |
 
 **Scenario B (Field Inspection PWA) — 120 minutes:**
 
