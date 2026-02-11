@@ -21,6 +21,10 @@ This scenario stress-tests SDD because:
 - **Eventual consistency** — your app and Stripe will temporarily disagree; the spec must define reconciliation
 - **Proration math** — mid-cycle upgrades/downgrades involve non-obvious financial calculations
 
+This is the same skill that appears at higher difficulty in:
+- Scenario P (⭐⭐⭐⭐): State machine complexity escalates to multi-step sagas with compensating transactions across distributed services
+- Scenario F (⭐⭐⭐⭐): Webhook/event processing scales to millions of events/sec with delivery guarantees and backpressure
+
 ---
 
 ## Phase Prompts
@@ -138,20 +142,35 @@ Non-goals (explicitly out of scope):
 - Tax calculation (will use Stripe Tax in a future iteration).
 - Coupon/discount codes (future iteration).
 - Refund self-service (handled manually by Support for now).
+
+Scope tiers:
+- MVP (required): Create subscription via Stripe Checkout + idempotent webhook handler (event deduplication) + subscription state tracking (trialing → active → canceled) + basic billing status display
+- Core (recommended): + Dunning flow (retry schedule + grace period + suspend) + upgrade/downgrade with Stripe proration + billing portal UI (plan, payment method, invoices) + email notifications for billing events
+- Stretch (optional): + Seat management with prorated add-on charges + reconciliation job (hourly Stripe-vs-app drift detection) + entitlement cache with Redis + observability dashboard (failed payments, webhook lag) + canary rollout with per-account feature flags
 ```
 
-**Deliberate ambiguities to watch for:**
-- What happens to data when an account is suspended? (read-only vs. full lockout)
-- Can a Member see the billing portal at all, or is it completely hidden?
-- What is the email sender name/address and template style?
-- How long are invoices retained and accessible?
-- Can an Account Owner transfer billing ownership to another user?
+**Deliberate ambiguities — decisions that `/speckit.clarify` should surface:**
+
+1. Decision needed: What happens to data when an account is suspended — read-only access (view and export) or full lockout (no access at all)?
+2. Decision needed: Can a Member see the billing portal at all, or is it completely hidden — and if visible, what information is shown vs. restricted?
+3. Decision needed: What is the email sender name/address and what templates are needed for each billing event in the dunning lifecycle?
+4. Decision needed: How long are invoices retained and accessible in-app — indefinitely, or cached for a period with on-demand Stripe fetch for older ones?
+5. Decision needed: Can an Account Owner transfer billing ownership to another user — and if so, does the new owner need to confirm via email?
+6. Decision needed: What happens to in-flight API requests when a subscription state change (e.g., suspension) occurs mid-request — complete the request or reject immediately?
+7. Decision needed: What timezone is used for "trial expires at midnight" calculations — always UTC, or the account's configured timezone?
+8. Decision needed: Can an Account Owner initiate a plan change while a payment retry is pending (past_due state)?
+9. Decision needed: How is the grace period clock affected if the user downgrades during the past_due window — reset, pause, or continue unchanged?
+10. Decision needed: What happens to unused seat credits if the Account Owner cancels the subscription — refunded, forfeited, or applied to final invoice?
+
+> [!NOTE]
+> Reference answers for facilitators are in [`_answers/D-stripe-subscriptions-answers.md`](_answers/D-stripe-subscriptions-answers.md).
 
 **Checkpoint** — verify the generated spec contains:
 - [ ] User stories with acceptance criteria
-- [ ] `[NEEDS CLARIFICATION]` markers for ambiguous areas
+- [ ] `[NEEDS CLARIFICATION]` markers for ambiguities above
 - [ ] A review and acceptance checklist
 - [ ] The subscription state machine is captured in the spec
+- [ ] MVP / Core / Stretch scope tiers
 
 ---
 
@@ -161,17 +180,7 @@ Non-goals (explicitly out of scope):
 /speckit.clarify Review the Stripe billing spec and ask me about every ambiguity, unstated assumption, and gap — especially around: suspended account data access, member visibility into billing, email templates, invoice retention, billing ownership transfer, Stripe Checkout vs custom checkout flow, and any financial edge cases you can identify.
 ```
 
-Suggested answers for the workshop:
-
-| Question Theme | Suggested Answer |
-|---|---|
-| Suspended account data access | Read-only: users can view and export their data but cannot create, edit, or delete anything. API returns 403 for mutating operations with a clear error message. |
-| Member visibility into billing | Members see their current plan tier and renewal date on a settings page, but cannot see payment details, invoices, or billing controls. |
-| Email sender and templates | Sender: "Billing <billing@ourapp.com>". Templates needed: trial starting, trial expiring (3 days before), payment succeeded, payment failed (x3 retries), account suspended, account reactivated. |
-| Invoice retention | Invoices are retained indefinitely in Stripe and cached in-app for 2 years. Older invoices are fetched on-demand from Stripe. |
-| Billing ownership transfer | Account Owner can transfer billing admin role to another user in the same account. Transfer is audit-logged. New owner must confirm via email. |
-| Checkout flow | Use Stripe Checkout (hosted) for initial subscription creation and Stripe Customer Portal for payment method updates. Do not build custom card forms. |
-| Annual plan cancellation mid-year | End-of-period cancellation: access continues until the annual renewal date. No partial refund. Immediate cancellation: no refund for remaining months (documented in cancellation confirmation dialog). |
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
 **Manual refinement:**
 
@@ -192,6 +201,7 @@ Read the review and acceptance checklist in the spec, and check off each item th
 - [ ] Dunning timeline is specified (Day 0, 3, 5, 7)
 - [ ] Every listed edge case has a defined behavior
 - [ ] Checkout flow decision is made (Stripe Checkout vs custom)
+- [ ] All 10 deliberate ambiguities have documented resolutions
 
 ---
 
@@ -268,6 +278,17 @@ Task constraints:
 - Financial correctness task explicitly compares app calculations to Stripe
 - Reconciliation job includes both drift detection and repair verification
 - Monitoring/alerting task exists for failed payments and webhook lag
+
+---
+
+### Analyze (Optional)
+
+```
+/speckit.analyze
+```
+
+> [!TIP]
+> Run `/speckit.analyze` after tasks to check cross-artifact consistency. It validates that every spec requirement has a corresponding task, and every task traces back to the spec. Particularly valuable for billing systems where a missed state transition or webhook handler gap means real money lost.
 
 ---
 

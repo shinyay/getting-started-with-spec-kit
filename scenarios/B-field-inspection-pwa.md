@@ -20,6 +20,10 @@ This scenario stress-tests SDD because:
 - **Media uploads** on flaky connections add async/failure-mode complexity
 - **Two user roles** with different capabilities test permission modeling
 
+This is the same skill that appears at higher difficulty in:
+- Scenario E (⭐⭐⭐⭐): Conflict resolution escalates from offline sync to real-time collaborative editing with CRDTs
+- Scenario F (⭐⭐⭐⭐): Data ingestion from devices scales to millions of events/sec with schema evolution and backpressure
+
 ---
 
 ## Phase Prompts
@@ -101,19 +105,34 @@ Edge cases to explicitly cover:
 - Time drift between devices.
 - Template updates while an inspection is in progress.
 - Storage full on device while inspection is in progress.
+
+Scope tiers:
+- MVP (required): Inspector completes offline checklist + auto-save to IndexedDB + basic sync on reconnect + inspector login with offline session persistence
+- Core (recommended): + Photo attachments with upload queue + conflict resolution UI (per-field choice) + supervisor review dashboard + PDF export
+- Stretch (optional): + Background sync via service worker + push notifications for submission status + template version management with migration banner + storage quota management with progressive warnings
 ```
 
-**Deliberate ambiguities to watch for:**
-- What is the completed inspection lifecycle? (After supervisor approval — archive? delete? retention period?)
-- Does the supervisor get notified of new submissions? (Push? Email? Dashboard badge?)
-- What happens to local data after confirmed server receipt?
-- Can a supervisor reject an inspection and send it back for rework?
-- How are template versions managed when inspectors have cached old versions?
+**Deliberate ambiguities — decisions that `/speckit.clarify` should surface:**
+
+1. Decision needed: What is the completed inspection lifecycle after supervisor approval — archive, delete, or retain with a defined retention period?
+2. Decision needed: How is the supervisor notified of new submissions — push notification, email digest, dashboard badge, or a combination?
+3. Decision needed: What happens to local data after confirmed server receipt — immediate purge, deferred cleanup, or manual user action?
+4. Decision needed: Can a supervisor reject an inspection and send it back for rework? If so, does it reopen as a draft on the inspector's device?
+5. Decision needed: How are template versions managed when inspectors have cached old versions — force update, allow completion with old version, or show a migration banner?
+6. Decision needed: What is the maximum number of concurrent in-progress inspections per inspector — unlimited, or capped to prevent storage exhaustion?
+7. Decision needed: How should photo metadata (GPS coordinates, EXIF timestamps) be handled — strip for privacy, keep for compliance, or make configurable per template?
+8. Decision needed: What happens if a supervisor opens an inspection for review while the inspector is still editing it offline — read-only snapshot, or block review until submission finalizes?
+9. Decision needed: Can inspectors access and reference their own past completed inspections while on-site, and if so, are those cached offline?
+10. Decision needed: How does the sync queue prioritize when multiple inspections are queued for upload — FIFO, by submission urgency, or by payload size (smallest first)?
+
+> [!NOTE]
+> Reference answers for facilitators are in [`_answers/B-field-inspection-pwa-answers.md`](_answers/B-field-inspection-pwa-answers.md).
 
 **Checkpoint** — verify the generated spec contains:
 - [ ] User stories with acceptance criteria
-- [ ] `[NEEDS CLARIFICATION]` markers for ambiguous areas
+- [ ] `[NEEDS CLARIFICATION]` markers for ambiguities above
 - [ ] A review and acceptance checklist
+- [ ] MVP / Core / Stretch scope tiers
 
 ---
 
@@ -123,18 +142,7 @@ Edge cases to explicitly cover:
 /speckit.clarify Review the Field Inspection spec and ask me about every ambiguity, unstated assumption, and gap — especially around: authentication flow, completed inspection lifecycle, supervisor notification mechanism, data retention policy, template versioning, and the specific behavior for each listed edge case.
 ```
 
-Suggested answers for the workshop:
-
-| Question Theme | Suggested Answer |
-|---|---|
-| Completed inspection lifecycle | After supervisor approval, inspection is archived. Local cache is purged after confirmed server receipt. Server retains data for 7 years (compliance). |
-| Supervisor notifications | Badge count on supervisor dashboard; optional email digest (daily). No push notifications in v1. |
-| Supervisor rejection | Supervisor can reject with comments; inspection returns to Inspector as a draft with rejection notes visible. |
-| Duplicate submission prevention | Idempotency key per submission; server deduplicates; UI disables button after first tap and shows spinner. |
-| Time drift | Use server timestamps as authoritative for sync ordering; device timestamps used only for local display. |
-| Template versioning | Inspection keeps the template version it was started with. If a newer template is available, show a non-blocking banner — do not force migration mid-inspection. |
-| Storage full | Warn at 80% capacity; block new photo attachments (not text) at 95%; never lose existing draft data. |
-| Camera access denied | Show a clear message explaining why the camera is needed; allow file upload from device as fallback. |
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
 **Manual refinement** — add details the AI missed:
 
@@ -156,6 +164,7 @@ Read the review and acceptance checklist in the spec, and check off each item th
 - [ ] Sync behavior fully specified (online → offline → online transitions)
 - [ ] Conflict resolution UX described (per-field or per-section choice)
 - [ ] Every listed edge case has a defined behavior
+- [ ] All 10 deliberate ambiguities have documented resolutions
 
 ---
 
@@ -233,6 +242,17 @@ Task breakdown rules:
 - Checkpoints between phases
 - The golden-path task appears early in the sequence
 - Integration checkpoint tasks exist between major components
+
+---
+
+### Analyze (Optional)
+
+```
+/speckit.analyze
+```
+
+> [!TIP]
+> Run `/speckit.analyze` after tasks to check cross-artifact consistency. It validates that every spec requirement has a corresponding task, and every task traces back to the spec. Particularly valuable for complex offline-first apps where sync and conflict requirements can easily get lost between the plan and implementation.
 
 ---
 

@@ -21,6 +21,10 @@ This scenario stress-tests SDD because:
 - **Deprecation is a process, not an event** — headers, documentation, usage tracking, communication cadence, and sunset enforcement must all be specified
 - **API contracts are machine-verifiable** — unlike UI specs, API specs can be validated automatically via contract tests, making SDD particularly powerful here
 
+This is the same skill that appears at higher difficulty in:
+- Scenario Q (⭐⭐⭐⭐): Plugin API contracts must be backward-compatible across versions while third-party developers build against them
+- Scenario R (⭐⭐⭐⭐): Feature lifecycle governance with kill switches applies the same "deprecation as a governed process" to feature rollouts
+
 ---
 
 ## Phase Prompts
@@ -123,23 +127,38 @@ Non-goals (explicitly out of scope):
 - GraphQL API (REST only).
 - WebSocket/streaming endpoints (future).
 - New v2-only features (this migration is about parity + standardization, not new functionality).
+
+Scope tiers:
+- MVP (required): v2 OpenAPI spec (contract-first) + 3 v2 endpoint groups (users, orders, products) with v2 standards (snake_case, cursor pagination, error envelope) + contract tests validating responses against OpenAPI spec
+- Core (recommended): + v1 translation shim (per-endpoint transformer modules) + v2 prefixed ID system with v1 alias support + deprecation headers on all v1 responses (Sunset + Deprecation) + v1 snapshot/golden tests for backward compatibility
+- Stretch (optional): + Per-client v1/v2 usage telemetry dashboard + post-sunset 410 Gone enforcement with per-endpoint feature flags + migration guide with per-endpoint field-by-field mapping + webhook versioning (v1 ↔ v2 format switching)
 ```
 
-**Deliberate ambiguities to watch for:**
-- How is the translation shim implemented? (Middleware? Separate controllers? Reverse proxy?)
-- What happens to v1 API documentation after sunset? (Archive? Remove? Redirect?)
-- Are there performance implications of the shim (extra serialization/deserialization)?
-- How are v2 contract tests structured? (Per-endpoint? Per-standard? Both?)
-- Who approves the sunset date and can it be extended?
+**Deliberate ambiguities — decisions that `/speckit.clarify` should surface:**
+
+1. Decision needed: How is the translation shim implemented — Express middleware, separate controllers, or a reverse proxy layer?
+2. Decision needed: What happens to v1 API documentation after sunset — archived at a stable URL, removed entirely, or redirected to v2 docs?
+3. Decision needed: What is the acceptable performance overhead of the v1 shim — and how is latency monitored per-endpoint?
+4. Decision needed: How are v2 contract tests structured — per-endpoint, per-standard (e.g., "all lists use cursor pagination"), or both?
+5. Decision needed: Who approves the sunset date, and can it be extended? What is the maximum number of extensions?
+6. Decision needed: What happens to in-flight v1 requests at the exact moment of sunset cutover — complete normally, or reject with 410?
+7. Decision needed: Is the v2 ID backfill migration performed online (zero-downtime, progressive) or offline (maintenance window)?
+8. Decision needed: Are rate limits different between v1 and v2 — and if v2 has higher limits as a migration incentive, how is this communicated?
+9. Decision needed: What happens if a client's integration tests break after the shim is deployed but before they've migrated to v2?
+10. Decision needed: Can a client request a per-client sunset extension, and if so, what is the technical mechanism (per-API-key feature flag)?
+
+> [!NOTE]
+> Reference answers for facilitators are in [`_answers/I-api-versioning-migration-answers.md`](_answers/I-api-versioning-migration-answers.md).
 
 **Checkpoint** — verify the generated spec contains:
 - [ ] User stories with acceptance criteria
-- [ ] `[NEEDS CLARIFICATION]` markers for ambiguous areas
+- [ ] `[NEEDS CLARIFICATION]` markers for ambiguities above
 - [ ] v2 standards defined (naming, pagination, errors, timestamps, envelope)
 - [ ] Compatibility window duration and support level
 - [ ] Communication cadence for deprecation notices
 - [ ] Migration guide requirements
 - [ ] A review and acceptance checklist
+- [ ] MVP / Core / Stretch scope tiers
 
 ---
 
@@ -149,18 +168,7 @@ Non-goals (explicitly out of scope):
 /speckit.clarify Review the API v1→v2 migration spec and ask me about every ambiguity, unstated assumption, and gap — especially around: shim implementation strategy, v1 documentation post-sunset, shim performance overhead, contract test structure, sunset date governance, webhook versioning details, and any API migration edge cases you can identify.
 ```
 
-Suggested answers for the workshop:
-
-| Question Theme | Suggested Answer |
-|---|---|
-| Shim implementation | Express middleware that intercepts v1 routes, transforms the incoming request to v2 format, calls the v2 handler, then transforms the v2 response back to v1 shape. Separate transformer modules per endpoint for testability. |
-| v1 docs post-sunset | Archive v1 docs at a /v1-archive URL. Main docs redirect to v2. Archive includes a banner: "v1 was sunset on [date]. See the migration guide." Keep archived for 2 years. |
-| Shim performance | Accept up to 20ms additional latency for v1 requests (JSON transform overhead). Monitor with a dedicated metric. If latency exceeds threshold, optimize the transformer. |
-| Contract test structure | Two layers: (1) Per-standard tests (e.g., "all list endpoints use cursor pagination", "all errors use error envelope") applied to every v2 endpoint. (2) Per-endpoint tests validating specific field names, types, and business logic. Both run on every CI build. |
-| Sunset governance | Engineering VP approves the sunset date. Extension requires a written justification with updated timeline. Maximum one extension of 3 months. Usage data (< 5% of total requests on v1) is the primary criterion for proceeding with sunset. |
-| Webhook versioning | Existing webhook subscriptions continue receiving v1 format. New subscriptions default to v2. Clients can switch their subscription to v2 format via the API. During the window, a client can receive both v1 and v2 webhooks for different subscriptions. |
-| v1 ID aliases in v2 | v2 endpoints accept v1 IDs as input (aliases) but always return the v2 prefixed ID in responses. The ID mapping is stored in the database. Alias resolution adds <5ms per request (indexed lookup). |
-| Bug compatibility | Document each known bug-compatibility case in the migration guide. The shim preserves bug behavior with a `// BUG_COMPAT: <description>` comment. Create a tracking issue for each to clean up post-sunset. |
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
 **Manual refinement:**
 
@@ -182,6 +190,7 @@ Read the review and acceptance checklist in the spec, and check off each item th
 - [ ] Post-sunset behavior is defined (410 Gone, not 404)
 - [ ] ID aliasing rules are specified (accept v1 IDs, return v2 IDs)
 - [ ] Every edge case has a defined behavior (bug compatibility, webhook versioning, rate limit incentive)
+- [ ] All 10 deliberate ambiguities have documented resolutions
 
 ---
 
@@ -268,6 +277,17 @@ Task preferences:
 - Telemetry and deprecation headers are separate tasks
 - Documentation includes a "smoke test the guide" validation task
 - Tasks are ordered: contracts → v2 implementation → shim → migration → telemetry → docs
+
+---
+
+### Analyze (Optional)
+
+```
+/speckit.analyze
+```
+
+> [!TIP]
+> Run `/speckit.analyze` after tasks to check cross-artifact consistency. It validates that every spec requirement has a corresponding task, and every task traces back to the spec. Particularly valuable for API migrations where a missed endpoint, an inconsistent response shape, or a missing contract test means broken client integrations in production.
 
 ---
 

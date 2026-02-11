@@ -21,6 +21,10 @@ This scenario stress-tests SDD because:
 - **OIDC is standards-based** — the spec must handle real protocol edge cases (clock skew, expired secrets, missing claims)
 - **Incremental rollout** means the plan must handle partial deployment states where some tenants have SSO and others don't
 
+This is the same skill that appears at higher difficulty in:
+- Scenario Q (⭐⭐⭐⭐): Capability-based permissions for a plugin runtime where third-party code runs inside your security boundary
+- Scenario R (⭐⭐⭐⭐): Targeting rules and audience segmentation function as fine-grained access control for experimentation
+
 ---
 
 ## Phase Prompts
@@ -120,19 +124,34 @@ Non-goals (explicitly out of scope):
 - SAML support (only OIDC for this iteration).
 - SCIM provisioning (later iteration).
 - Social login (Google, GitHub, etc.) — only enterprise OIDC IdPs.
+
+Scope tiers:
+- MVP (required): Tenant Admin configures OIDC (issuer URL + client ID + secret) + SSO login works alongside existing password login + basic role assignment (Viewer, Editor, Admin) per tenant
+- Core (recommended): + JIT provisioning for new SSO users + account linking confirmation flow + RBAC enforcement middleware on all routes + audit logging for security-sensitive actions
+- Stretch (optional): + SSO enforcement mode (disable password per tenant) + dual OIDC secret rotation (old + new overlap) + Support impersonation with audit trail + login rate limiting + per-tenant feature flags for staged rollout
 ```
 
-**Deliberate ambiguities to watch for:**
-- What happens to a user's active sessions when their role changes? (immediate invalidation? grace period?)
-- Should Tenant Admin be able to see login failure details (e.g., which claim was missing)?
-- What is the audit log retention policy?
-- Can a Support/Admin impersonate a user for debugging? If so, how is that audited?
-- How is the OIDC client secret rotated without downtime?
+**Deliberate ambiguities — decisions that `/speckit.clarify` should surface:**
+
+1. Decision needed: What happens to a user's active sessions when their role changes — immediate invalidation, grace period, or re-check on next request?
+2. Decision needed: Should Tenant Admin be able to see login failure details (e.g., which claim was missing), or is that restricted to Support?
+3. Decision needed: What is the audit log retention policy — how long in hot storage vs. cold archive, and is it configurable per tenant?
+4. Decision needed: Can a Support/Admin impersonate a user for debugging? If so, how is that audited and is there a time limit?
+5. Decision needed: How is the OIDC client secret rotated without downtime — dual active secrets during a rotation window?
+6. Decision needed: What happens to existing password-only users when a Tenant Admin enables SSO enforcement mode — are they locked out, given a grace period, or force-linked?
+7. Decision needed: Can a user belong to multiple tenants with different roles in each — and if so, how is the "current tenant" determined at login?
+8. Decision needed: What is the idle session timeout, and is it configurable per tenant for compliance reasons?
+9. Decision needed: Is there a "test connection" step to validate OIDC configuration before it goes live — preventing misconfiguration lockouts?
+10. Decision needed: How quickly is an active session terminated when a user is deactivated in the OIDC provider — on next token refresh, or proactively?
+
+> [!NOTE]
+> Reference answers for facilitators are in [`_answers/C-oidc-sso-rbac-answers.md`](_answers/C-oidc-sso-rbac-answers.md).
 
 **Checkpoint** — verify the generated spec contains:
 - [ ] User stories with acceptance criteria
-- [ ] `[NEEDS CLARIFICATION]` markers for ambiguous areas
+- [ ] `[NEEDS CLARIFICATION]` markers for ambiguities above
 - [ ] A review and acceptance checklist
+- [ ] MVP / Core / Stretch scope tiers
 
 ---
 
@@ -142,17 +161,7 @@ Non-goals (explicitly out of scope):
 /speckit.clarify Review the OIDC SSO + RBAC spec and ask me about every ambiguity, unstated assumption, and gap — especially around: session behavior on role change, admin visibility into login failures, audit log retention, support/admin impersonation, OIDC secret rotation, rate limiting on login, and any security edge cases you can identify.
 ```
 
-Suggested answers for the workshop:
-
-| Question Theme | Suggested Answer |
-|---|---|
-| Role change + active sessions | Role changes take effect on the next request (middleware re-checks on every request). No session invalidation needed, but cached permissions must not be used. |
-| Admin visibility into login failures | Tenant Admin can see failure reason (e.g., "claim 'email' missing") but never sees tokens or secrets. Support/Admin sees the same plus request correlation IDs. |
-| Audit log retention | 90 days in hot storage (queryable), 2 years in cold storage (archive). Configurable per tenant for compliance. |
-| Support impersonation | Support/Admin can impersonate a user with an explicit "impersonation mode" that is audit-logged with the support agent's identity. A banner is shown during impersonation. |
-| OIDC secret rotation | Support dual active secrets (old + new) during rotation window. Tenant Admin can add a new secret before revoking the old one. Validate both during the overlap period. |
-| Rate limiting | 5 failed login attempts per email per 5 minutes → temporary lockout with CAPTCHA. Applies to both password and SSO flows. |
-| OIDC provider certificate/key rotation | Fetch JWKS from provider's well-known endpoint; cache with a TTL (default 24h); force-refresh on signature validation failure (with rate limit on refreshes). |
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
 **Manual refinement:**
 
@@ -173,6 +182,7 @@ Read the review and acceptance checklist in the spec, and check off each item th
 - [ ] Logout flow is fully specified (local session + OIDC provider + all-devices)
 - [ ] JIT provisioning rules are explicit (new user vs. existing user linking)
 - [ ] SSO enforcement mode behavior is documented (including accidental disable recovery)
+- [ ] All 10 deliberate ambiguities have documented resolutions
 
 ---
 
@@ -251,6 +261,17 @@ Constraints for tasks:
 - "Attack mindset" task(s) validate security from an adversarial perspective
 - Canary tenant deployment before production rollout
 - Migration tasks have explicit rollback steps
+
+---
+
+### Analyze (Optional)
+
+```
+/speckit.analyze
+```
+
+> [!TIP]
+> Run `/speckit.analyze` after tasks to check cross-artifact consistency. It validates that every spec requirement has a corresponding task, and every task traces back to the spec. Particularly valuable for security-sensitive systems where a missed auth check or tenant isolation gap can become a vulnerability.
 
 ---
 

@@ -21,6 +21,10 @@ This scenario stress-tests SDD because:
 - **Drift detection is an ongoing operational concern** — the spec must define what happens when reality diverges from code
 - **Cost control requires governance, not just monitoring** — without guardrails, a typo in instance sizing costs thousands
 
+This is the same skill that appears at higher difficulty in:
+- Scenario R (⭐⭐⭐⭐): Progressive rollout governance with kill switches — the same "change governance" problem applied to feature releases instead of infrastructure
+- Scenario P (⭐⭐⭐⭐): Multi-step orchestration with rollback/compensation — the same "apply-then-verify-then-rollback" pattern applied to distributed business workflows
+
 ---
 
 ## Phase Prompts
@@ -141,22 +145,37 @@ Non-goals (explicitly out of scope):
 - Multi-region deployment (single region for v1).
 - Kubernetes (using ECS Fargate, not EKS).
 - DNS / domain management (handled separately).
+
+Scope tiers:
+- MVP (required): VPC + ECS Fargate + ALB + RDS in dev environment with remote state (S3 + DynamoDB locking) + basic GitHub Actions workflow (plan on PR, apply on merge)
+- Core (recommended): + Staging and prod environments via tfvars + OIDC federation (no static keys) + GitHub Environment protection rules (approval gates) + CI pipeline (fmt → validate → plan → tfsec → apply) + cost budgets per environment
+- Stretch (optional): + Scheduled drift detection with alerting + Infracost on PRs + dev auto-stop (EventBridge scheduled scaling) + tagging enforcement + security scanning (tfsec/Checkov) + operational runbooks (rollback, drift remediation, secret rotation)
 ```
 
-**Deliberate ambiguities to watch for:**
-- What is the Terraform directory/module structure? (flat vs nested, monorepo vs multi-repo)
-- How is the ECR repository provisioned? (same Terraform or separate bootstrap?)
-- What is the exact OIDC trust policy for GitHub Actions → AWS?
-- How are database credentials managed? (Secrets Manager + rotation?)
-- What monitoring/alerting goes to whom? (PagerDuty? Slack? Email?)
+**Deliberate ambiguities — decisions that `/speckit.clarify` should surface:**
+
+1. Decision needed: What is the Terraform directory/module structure — flat vs. nested modules, monorepo vs. multi-repo?
+2. Decision needed: How is the ECR repository provisioned — same Terraform config or separate bootstrap that runs once?
+3. Decision needed: What is the exact OIDC trust policy for GitHub Actions → AWS — scoped to repo + branch, or broader?
+4. Decision needed: How are database credentials managed — Secrets Manager with automatic rotation, or manual rotation with a runbook?
+5. Decision needed: What monitoring/alerting goes to whom — PagerDuty for prod, Slack for dev/staging, email for budget alerts?
+6. Decision needed: How is the Terraform version pinned and upgraded consistently across all environments — tfenv, mise, or CI-enforced constraint?
+7. Decision needed: What happens when a module update requires a resource replacement (destroy + create) on a stateful resource in production — auto-approve, or require manual confirmation?
+8. Decision needed: How are shared cross-environment resources (ECR repos, IAM policies, OIDC provider) managed — same state file, separate bootstrap state, or per-environment duplication?
+9. Decision needed: What is the approval process when `terraform plan` shows resources being destroyed in production — different from normal apply approval?
+10. Decision needed: How long is the saved plan artifact valid before it must be regenerated — and what prevents a stale plan from being applied after the infrastructure has changed?
+
+> [!NOTE]
+> Reference answers for facilitators are in [`_answers/G-terraform-github-actions-answers.md`](_answers/G-terraform-github-actions-answers.md).
 
 **Checkpoint** — verify the generated spec contains:
 - [ ] User stories / operator stories with acceptance criteria
-- [ ] `[NEEDS CLARIFICATION]` markers for ambiguous areas
+- [ ] `[NEEDS CLARIFICATION]` markers for ambiguities above
 - [ ] Environment sizing table (dev/staging/prod)
 - [ ] CI/CD pipeline stages defined
 - [ ] Cost budgets per environment
 - [ ] A review and acceptance checklist
+- [ ] MVP / Core / Stretch scope tiers
 
 ---
 
@@ -166,17 +185,7 @@ Non-goals (explicitly out of scope):
 /speckit.clarify Review the Terraform + GitHub Actions infrastructure spec and ask me about every ambiguity, unstated assumption, and gap — especially around: Terraform directory structure, ECR bootstrap, OIDC trust policy details, database credential management, alerting destinations, state bucket bootstrap (chicken-and-egg), and any operational gaps you can identify.
 ```
 
-Suggested answers for the workshop:
-
-| Question Theme | Suggested Answer |
-|---|---|
-| Terraform directory structure | Monorepo. Top-level: `modules/` (reusable modules: networking, compute, database, observability), `environments/` (dev/, staging/, prod/ — each with main.tf, tfvars, backend.tf). Shared provider config at root. |
-| ECR bootstrap | ECR repository is provisioned by a separate "bootstrap" Terraform config (`bootstrap/` directory) that is applied manually once. This avoids the chicken-and-egg problem. Bootstrap also creates the S3 state bucket and DynamoDB lock table. |
-| OIDC trust policy | GitHub Actions OIDC provider is registered in each AWS account. IAM role trust policy restricts to the specific GitHub org/repo and branch (main for apply, any branch for plan). |
-| Database credentials | RDS master password generated by Terraform and stored in AWS Secrets Manager. Application retrieves credentials from Secrets Manager at runtime. Password rotation via Secrets Manager automatic rotation (every 30 days). Terraform does not store the password in state (use `manage_master_user_password = true` for RDS). |
-| Alerting destinations | CloudWatch alarms → SNS topic → Slack channel (#infra-alerts) for all environments. Prod critical alarms (service down, budget exceeded) additionally page via PagerDuty. |
-| State bucket bootstrap | The S3 bucket, DynamoDB lock table, and OIDC provider are in the `bootstrap/` config, applied manually with local state. This is the only Terraform that uses local state. Documented in the "Getting Started" runbook. |
-| Terraform version management | Pin Terraform version in `required_version` constraint. Use tfenv or mise for local version management. CI uses a specific Terraform version in the GitHub Actions workflow. Provider versions are pinned with `~>` constraint (allow patch updates only). |
+Review the questions surfaced by Spec Kit. Use the deliberate ambiguity list above as a checklist — did the AI catch all 10? If not, add the missed ones manually.
 
 **Manual refinement:**
 
@@ -198,6 +207,7 @@ Read the review and acceptance checklist in the spec, and check off each item th
 - [ ] Cost budgets are concrete per environment
 - [ ] Bootstrap sequence is documented (state bucket, ECR, OIDC)
 - [ ] All edge cases have defined runbook procedures
+- [ ] All 10 deliberate ambiguities have documented resolutions
 
 ---
 
@@ -283,6 +293,17 @@ Task preferences:
 - Security review and cost validation are explicit tasks, not afterthoughts
 - Documentation tasks exist alongside implementation tasks
 - Each task has a concrete "done when" check
+
+---
+
+### Analyze (Optional)
+
+```
+/speckit.analyze
+```
+
+> [!TIP]
+> Run `/speckit.analyze` after tasks to check cross-artifact consistency. It validates that every spec requirement has a corresponding task, and every task traces back to the spec. Particularly valuable for infrastructure projects where a missed security group rule or IAM policy gap becomes a production security incident.
 
 ---
 
