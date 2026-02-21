@@ -383,7 +383,7 @@ This validates that your spec, plan, and tasks are aligned with no gaps or contr
 | First-time SDD learners | **Scenario A** (QuickRetro) — simplest CRUD baseline |
 | Beginners wanting more depth | **J** (Pomodoro), **K** (Markdown Notes), or **L** (Recipe Collection) — each teaches a different SDD concept at beginner level |
 | Ready for server-side development | **M** (URL Shortener), **N** (Kanban Board), or **O** (CSV Importer) — introduces Express + SQLite + API contracts |
-| Experienced developers, real-world challenge | **Scenario B** (Field Inspection PWA), **C** (OIDC SSO), or **D** (Stripe Billing) |
+| Experienced developers, real-world challenge | **Scenario B** (Field Inspection PWA), **C** (OIDC SSO), or **D** (Stripe Subscriptions) |
 | Mature engineers, distributed systems | **P** (Saga), **Q** (Plugin Runtime), or **R** (Feature Flags) — requires failure model + invariant thinking |
 | Mixed audience | Let participants self-select from their level tier; pair beginners together |
 | Conference talk (tight time, 60 min) | **Scenario A** or **J** (MVP tier only) |

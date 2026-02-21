@@ -18,7 +18,7 @@ No server, no database. Pure frontend or single-file apps. Focus on learning the
 |---|---|---|---|---|
 | **A** | [QuickRetro](scenarios/A-quick-retro.md) | Team retrospective board | Data modeling, CRUD specs, permissions | ~90 min |
 | **J** | [Pomodoro Timer](scenarios/J-pomodoro-timer.md) | Focus timer + task tracker | State machine specification, time-based logic | ~90 min |
-| **K** | [MarkdownPad](scenarios/K-markdown-notes.md) | Note-taking app with preview | Rendering correctness, feature whitelists, XSS prevention | ~90 min |
+| **K** | [MarkdownPad](scenarios/K-markdown-notes.md) | Note-taking app with preview | Rendering correctness, feature whitelist, XSS prevention | ~90 min |
 | **L** | [RecipeBox](scenarios/L-recipe-collection.md) | Recipe collection + meal planner | Fraction arithmetic, calculation correctness, unit conversion | ~90 min |
 
 **Which one?**
@@ -39,7 +39,7 @@ All ⭐⭐ scenarios share a [baseline contract](WORKSHOP.md#intermediate-baseli
 |---|---|---|---|---|
 | **H** | [Log Analysis CLI](scenarios/H-cross-platform-cli.md) | Cross-platform log parser | CLI output contracts, deterministic output, streaming | ~100 min |
 | **M** | [ShortLink](scenarios/M-url-shortener.md) | URL shortener + analytics API | API contract design, HTTP redirect semantics, cursor pagination | ~100 min |
-| **N** | [KanbanFlow](scenarios/N-kanban-board.md) | Task board with drag-and-drop | Multi-entity relationships, ordering algorithms, cascade operations | ~100 min |
+| **N** | [KanbanFlow](scenarios/N-kanban-board.md) | Task board with drag-and-drop | Multi-entity relationships, fractional indexing, cascade operations | ~100 min |
 | **O** | [MoneyTrail](scenarios/O-csv-importer.md) | CSV importer + spending reports | Data validation pipelines, money-as-cents, aggregation correctness | ~100 min |
 
 **Which one?**
@@ -58,12 +58,12 @@ External services, auth, multi-tenancy, financial correctness. These mirror prod
 |---|---|---|---|---|
 | **B** | [Field Inspection PWA](scenarios/B-field-inspection-pwa.md) | Offline-first mobile app | Offline sync, conflict resolution, media uploads | ~120 min |
 | **C** | [OIDC SSO + RBAC](scenarios/C-oidc-sso-rbac.md) | Enterprise auth system | Security contracts, multi-tenancy, secret rotation | ~120 min |
-| **D** | [Stripe Billing](scenarios/D-stripe-subscriptions.md) | Subscription + dunning flow | Money correctness, idempotency, webhook state machines | ~120 min |
+| **D** | [Stripe Subscriptions + Dunning](scenarios/D-stripe-subscriptions.md) | Subscription + dunning flow | Money correctness, idempotency, webhook state machines | ~120 min |
 | **G** | [Terraform + GitHub Actions](scenarios/G-terraform-github-actions.md) | Infrastructure-as-Code pipeline | Drift detection, blast radius, governance | ~120 min |
-| **I** | [API Versioning v1→v2](scenarios/I-api-versioning-migration.md) | API migration with shim layer | Backward compatibility, deprecation governance | ~110 min |
+| **I** | [API Versioning Migration (v1→v2)](scenarios/I-api-versioning-migration.md) | API migration with shim layer | Backward compatibility, deprecation governance | ~110 min |
 
 **Which one?**
-- 🟢 **D (Stripe Billing)** — The "money must be exact" constraint shows why SDD prevents real-world damage.
+- 🟢 **D (Stripe Subscriptions)** — The "money must be exact" constraint shows why SDD prevents real-world damage.
 - 🟡 **B (Field Inspection)** — The "what happens offline?" question teaches sync conflict specification.
 - 🟡 **C (OIDC SSO)** — The "who can access what?" question teaches security-first specification.
 - 🟡 **I (API Versioning)** — The "200 consumers depend on v1" constraint teaches backward-compatible specification.

@@ -5,16 +5,7 @@ echo ""
 echo "🔍 Setting up Spec Kit Dev Container..."
 echo ""
 
-# Install GitHub Copilot CLI (Node.js available from devcontainer feature)
-echo "🤖 Installing GitHub Copilot CLI..."
-if npm install -g @github/copilot@latest 2>&1 | tail -1; then
-    echo "✅ GitHub Copilot CLI installed"
-else
-    echo "⚠️  GitHub Copilot CLI install failed (optional, can retry later)"
-fi
-
 # Upgrade specify CLI to the latest version
-echo ""
 echo "⬆️  Upgrading specify CLI to latest..."
 if uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git 2>&1 | tail -1; then
     echo "✅ specify CLI is up to date"
@@ -54,12 +45,6 @@ if command -v node &> /dev/null; then
     echo "  ✅ node $(node --version 2>/dev/null)"
 else
     echo "  ❌ node - NOT FOUND"
-fi
-
-if command -v github-copilot-cli &> /dev/null || command -v copilot &> /dev/null; then
-    echo "  ✅ GitHub Copilot CLI"
-else
-    echo "  ⚠️  GitHub Copilot CLI - not found (optional)"
 fi
 
 echo ""
