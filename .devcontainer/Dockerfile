@@ -7,7 +7,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 USER vscode
 
 # Install specify CLI (installs to ~/.local/bin/)
-RUN uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+RUN uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v0.1.4
 ENV PATH="/home/vscode/.local/bin:${PATH}"
 
 # Switch back to root so devcontainer features can install properly

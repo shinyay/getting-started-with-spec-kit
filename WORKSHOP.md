@@ -144,6 +144,9 @@ All ⭐⭐⭐⭐ advanced scenarios share these requirements in addition to stan
 > [!NOTE]
 > No local installation is required. Everything runs inside a pre-configured Dev Container on GitHub Codespaces.
 
+> [!IMPORTANT]
+> This workshop is tested with **Spec Kit v0.1.4** (`specify-cli 0.1.4`). The Dev Container pins this version automatically. If you run locally, install the same version: `uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v0.1.4`
+
 ---
 
 ## Part 1: Setup & Context [15 min]

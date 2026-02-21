@@ -7,7 +7,7 @@ echo ""
 
 # Upgrade specify CLI to the latest version
 echo "⬆️  Upgrading specify CLI to latest..."
-if uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git 2>&1 | tail -1; then
+if uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@v0.1.4 2>&1 | tail -1; then
     echo "✅ specify CLI is up to date"
 else
     echo "⚠️  specify CLI upgrade failed (using version baked into image)"

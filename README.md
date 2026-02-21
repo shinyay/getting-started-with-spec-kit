@@ -28,6 +28,9 @@ The **Clarify** step is where SDD pays off: Spec Kit surfaces the hidden assumpt
 
 **Prerequisites:** A GitHub account with [GitHub Copilot](https://github.com/features/copilot) access.
 
+> [!NOTE]
+> This workshop is built and tested with **[Spec Kit v0.1.4](https://github.com/github/spec-kit/releases/tag/v0.1.4)**. The Dev Container pins this version for reproducibility. Check the [Spec Kit releases](https://github.com/github/spec-kit/releases) for newer versions.
+
 ### 1. Launch the environment
 
 Click the **"Open in GitHub Codespaces"** badge above — you'll have a fully configured environment in ~60 seconds.
