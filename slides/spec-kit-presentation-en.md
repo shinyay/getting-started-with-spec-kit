@@ -499,7 +499,6 @@ Add features to existing projects, modernize legacy codebases
 ┌───────────────────────────────────────┐
 │  .specify/  │  .github/  │  .vscode/  │  ← Project scaffolding
 └──────┬──────┴─────┬──────┴─────┬──────┘
-       │            │            │
   Templates    Agents &      VS Code
   & Scripts    Prompts       Settings
        │            │
@@ -510,8 +509,6 @@ Add features to existing projects, modernize legacy codebases
 │  plan / tasks / code    │
 └─────────────────────────┘
 ```
-
-> **CLI scaffolds the project → AI executes phases → specs drive code**
 
 ---
 
@@ -570,11 +567,7 @@ specify init . --ai copilot --force
 ### `--ai` options (20+)
 `copilot` · `claude` · `gemini` · `cursor-agent` · `codex` · `windsurf` · `qwen` · `opencode` · `kilocode` · `auggie` · `roo` · `codebuddy` · `amp` · `shai` · `q` · `bob` · `qodercli` · `agy` · `generic`
 
-### Additional flags
-- `--ai-skills` — Prompt.MD templates (SKILL.md)
-- `--script ps` — PowerShell scripts (Windows)
-- `--no-git` — Skip Git initialization
-- `SPECIFY_FEATURE` env var — feature detection override for non-Git repos
+> **Additional flags:** `--ai-skills` (SKILL.md templates) · `--script ps` (Windows) · `--no-git` (skip Git) · `SPECIFY_FEATURE` env var (non-Git repos)
 
 ---
 
@@ -838,11 +831,7 @@ Based on `spec-driven.md`:
 
 And 4 more: test-first, modular by default, config over code, security by default
 
-### 4 Design Philosophies
-
-Modularity > Monoliths · Observability > Opacity · Simplicity > Cleverness · Integration > Isolation
-
-> These are **immutable** — implementation details evolve, principles remain constant
+> **4 Design Philosophies:** Modularity > Monoliths · Observability > Opacity · Simplicity > Cleverness · Integration > Isolation — these are **immutable**
 
 ---
 
@@ -2308,10 +2297,7 @@ localStorage → Single DB (M) → Eventual consistency (D) → Real-time conver
 | **Team training** | Everyone starts with A → self-select by level |
 | **Conference (60 min)** | A or J, MVP tier only |
 
-### Tips
-- **Never skip Clarify** — it's the ROI source
-- Check answer keys **after** (not during) — think first
-- Watch **constitution density grow** with project risk
+> **Tips:** Never skip Clarify (ROI source) · Check answer keys **after**, not during · Watch constitution density grow with risk
 
 ---
 
@@ -2339,21 +2325,17 @@ localStorage → Single DB (M) → Eventual consistency (D) → Real-time conver
 # Resources
 
 ### Spec Kit
-- **Repository:** `github.com/github/spec-kit`
-- **📽️ Video Overview:** `youtube.com/watch?v=a9eR1xsfvHg`
-- **📖 Documentation:** `github.github.io/spec-kit/`
-- **Workshop Guide:** `WORKSHOP.md` · **Scenarios:** `SCENARIOS.md`
+- **Repository:** `github.com/github/spec-kit` · **Docs:** `github.github.io/spec-kit/`
+- **📽️ Video:** `youtube.com/watch?v=a9eR1xsfvHg` · **Workshop:** `WORKSHOP.md` · **Scenarios:** `SCENARIOS.md`
 
 ### SDD Methodology
-- **Complete guide:** `spec-driven.md`
-- **Phase details:** each `/speckit.*` prompt file
+- **Complete guide:** `spec-driven.md` · **Phase details:** each `/speckit.*` prompt file
 
 ### Get Started Now
 
 ```bash
 specify init my-first-sdd-project --ai copilot
-cd my-first-sdd-project && code .
-# Open Copilot Chat → type /speckit.constitution
+cd my-first-sdd-project && code .  # then: /speckit.constitution
 ```
 
 ---
