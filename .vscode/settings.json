@@ -1,5 +1,5 @@
 {
-    "markdown.marp.themes": [
-        "./slides/themes/github-dark.css"
-    ]
+  "markdown.marp.themes": [
+    "./slides/themes/github-dark.css"
+  ]
 }

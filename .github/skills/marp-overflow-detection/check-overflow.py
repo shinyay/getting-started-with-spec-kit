@@ -240,22 +240,22 @@ def estimate_slide_height(slide_content: str) -> tuple[float, list[str]]:
             i += 1
             continue
 
+        # Nested list item (must be checked before top-level list item)
+        if re.match(r"^  +[-*+]\s", line) or re.match(r"^  +\d+\.\s", line):
+            text = re.sub(r"^[-*+\d.]+\s*", "", stripped)
+            nested_font = FONT_SIZE * 0.92
+            n_lines = _count_text_lines(text)
+            h = n_lines * (nested_font * LINE_HEIGHT) + nested_font * 0.15
+            height += h
+            i += 1
+            continue
+
         # List item
         if re.match(r"^[-*+]\s", stripped) or re.match(r"^\d+\.\s", stripped):
             # List item text content
             text = re.sub(r"^[-*+\d.]+\s*", "", stripped)
             n_lines = _count_text_lines(text)
             h = n_lines * BASE_LINE + FONT_SIZE * 0.35  # li margin-bottom
-            height += h
-            i += 1
-            continue
-
-        # Nested list item
-        if re.match(r"^  +[-*+]\s", line) or re.match(r"^  +\d+\.\s", line):
-            text = re.sub(r"^[-*+\d.]+\s*", "", stripped)
-            nested_font = FONT_SIZE * 0.92
-            n_lines = _count_text_lines(text)
-            h = n_lines * (nested_font * LINE_HEIGHT) + nested_font * 0.15
             height += h
             i += 1
             continue
@@ -289,19 +289,8 @@ def analyze(filepath: str) -> list[SlideMetrics]:
 
     results = []
     for idx, (start_line, slide_content) in enumerate(slides, 1):
-        # Detect slides with paginate: false via Marp directives
-        is_divider = bool(
-            re.search(r"section:has\(> h1:only-child\)", slide_content)
-        ) or (
-            slide_content.strip().count("\n") < 5
-            and re.match(r"^(<!--.*?-->\s*\n)*#\s+", slide_content.strip())
-        )
-
         estimated, breakdown = estimate_slide_height(slide_content)
         available = USABLE_HEIGHT
-
-        # Section divider slides are vertically centered, so less likely to overflow
-        # Height estimation is still the same
 
         metrics = SlideMetrics(
             slide_number=idx,
