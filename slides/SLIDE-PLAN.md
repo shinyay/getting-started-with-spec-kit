@@ -380,12 +380,12 @@ Total:                                                  ~131 slides
 
 ### Marp Theme Settings
 - **Theme:** `github-dark` ([slides/themes/github-dark.css](themes/github-dark.css))
-- **Background:** `#0a0a0a`
+- **Background:** `#0d1117`
 - **Text:** `#c9d1d9`
 - **Headings:** `#ffffff`
-- **Accent color:** `#3fb950` (green)
+- **Accent color:** `#7ee787` (green)
 - **Code background:** `#161b22`
-- **Font:** Mona Sans (primary), system sans-serif fallback — remove `Noto Sans JP`, `Hiragino Kaku Gothic ProN`, and `Meiryo` from font stack for English version
+- **Font:** Mona Sans (primary), system sans-serif fallback; theme font stack also includes `Noto Sans JP`, `Hiragino Kaku Gothic ProN`, and `Meiryo` for Japanese text compatibility
 
 ### Marp Front-Matter (exact block for the English presentation)
 
@@ -475,7 +475,7 @@ Pre-implementation checks:
 - [ ] All 20+ supported AI agents referenced where relevant
 - [ ] `spec-driven.md` concepts (Power Inversion, 3 modes, constitution articles) are incorporated
 - [ ] Workshop scenarios (A–R) are all referenced with English descriptions
-- [ ] Slide count matches statistics table (129 slides total)
+- [ ] Slide count matches statistics table (131 slides total)
 - [ ] 📽️ Video Overview slide is included (Section 1.3)
 - [ ] Extension System section is present (Section 1.9, 3 slides)
 - [ ] Phase -1 Gates has its own dedicated slide (Section 1.8)
